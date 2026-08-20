@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="万法之网·今日一念——一个人用五年收下的 124 个思维之念。每天点亮一念，配三个问题带进你的一天。零追踪·零外联。">
+<title>万法之网 · 今日一念</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23D4A94E' d='M32 2 39 25 62 32 39 39 32 62 25 39 2 32 25 25Z'/%3E%3C/svg%3E">
+<script>
+(function(){try{
+  document.documentElement.classList.add('js');
+  if(localStorage.getItem('lb-theme')==='day'){document.documentElement.classList.remove('night');document.documentElement.classList.add('day');}
+}catch(e){}})();
+</script>
+<style>
+:root{color-scheme:dark light}
+html.night{--bg:#0B1220;--text:#E8E4D8;--dim:#9FA093;--gold:#D4A94E;--hair:rgba(212,169,78,.3);--cardbg:rgba(13,21,38,.55)}
+html.day{--bg:#FAF6EF;--text:#2A2622;--dim:#6B6154;--gold:#9A6B1F;--hair:rgba(154,107,31,.3);--cardbg:rgba(250,246,239,.75)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong','SimSun',serif;line-height:1.9;transition:background-color .8s,color .8s}
+main{max-width:860px;margin:0 auto;padding:48px 20px 60px}
+header{text-align:center;margin-bottom:40px}
+h1{font-size:clamp(1.6rem,5vw,2.4rem);letter-spacing:.12em;margin:.2em 0}
+.sub{color:var(--dim);font-size:.95rem;letter-spacing:.22em}
+.rule{width:1px;height:36px;background:var(--gold);opacity:.7;margin:18px auto}
+.mission{color:var(--dim);max-width:34em;margin:0 auto;font-size:.98rem}
+section{margin:0 0 46px}
+h2{font-size:1.15rem;letter-spacing:.28em;color:var(--gold);text-align:center;font-weight:400;margin-bottom:6px}
+.note{color:var(--dim);font-size:.85rem;text-align:center;margin:0 0 20px}
+.card{border:1px solid var(--hair);border-radius:14px;background:var(--cardbg);padding:30px 26px;text-align:center}
+.today-name{font-size:clamp(2rem,7vw,3rem);letter-spacing:.1em;margin:8px 0 4px}
+.today-sub{color:var(--dim);font-size:.8rem;letter-spacing:.3em}
+.qs{margin:22px 0 0;padding:0;list-style:none;text-align:left;max-width:30em;margin-left:auto;margin-right:auto}
+.qs li{margin:10px 0;padding-left:1.4em;position:relative;color:var(--text)}
+.qs li::before{content:'◇';position:absolute;left:0;color:var(--gold);opacity:.8}
+.btns{text-align:center;margin:16px 0 0}
+button{font:inherit;font-size:.85rem;letter-spacing:.2em;color:var(--dim);background:transparent;border:1px solid var(--hair);border-radius:999px;padding:7px 20px;cursor:pointer;transition:color .4s,border-color .4s}
+button:hover{color:var(--gold);border-color:var(--gold)}
+#sky{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;margin:10px 0 6px}
+.star{color:var(--dim);font-size:.82rem;letter-spacing:.06em;cursor:default;padding:2px 4px;border-radius:6px;transition:color .3s}
+.star:hover{color:var(--gold)}
+.star.lit{color:var(--gold)}
+footer{border-top:1px solid var(--hair);margin-top:40px;padding-top:18px;text-align:center;color:var(--dim);font-size:.78rem;letter-spacing:.08em}
+footer a{color:inherit}
+.controls{position:fixed;top:14px;right:14px;z-index:20}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="controls"><button type="button" id="theme-btn" aria-label="切换日夜主题">日</button></div>
+<main>
+<header>
+  <h1>万法之网</h1>
+  <div class="sub">—— 今日一念 ——</div>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="mission">一个人用五年时间，把读过的书、吃过的亏、想通的事，收成一百二十四个"念"。<br>这张网不教你想什么——它提醒你<strong>今天可以想哪一格</strong>。</p>
+</header>
+
+<section aria-label="今日一念">
+  <h2>今日一念</h2>
+  <p class="note">每天自动点亮同一念——同一天，全世界同念。</p>
+  <div class="card">
+    <div class="today-sub">念</div>
+    <div class="today-name" id="today-name">…</div>
+    <ol class="qs" id="qs">
+      <li>这个念，今天在你生活的哪个角落出现过？</li>
+      <li>如果用它重新看一件你的旧事，会看出什么新东西？</li>
+      <li>今晚睡前，它能变成哪一句话留给明天？</li>
+    </ol>
+    <div class="btns"><button type="button" id="next-btn">再看一念</button></div>
+  </div>
+</section>
+
+<section aria-label="星空">
+  <h2>一百二十四念</h2>
+  <p class="note">每一颗都是一个收进网里的念头。悬停有微光；今日的那颗是金色的。</p>
+  <div id="sky" aria-label="万法之网全念星空"></div>
+</section>
+
+<footer>
+  万法之网 · 今日一念 · XYZ 星际疗愈工程 · 2026<br>
+  概念精选卡与深度释义将随共创层陆续点亮（待编者终审）<br>
+  <a href="./">← 回到主书</a> · <a href="./sense.html">书的神经末梢</a> · <a href="./contribute.html">共同写作</a>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var CONCEPTS=["事实","假设","实验","验证","证据","信息","数据","知识","智慧","学习","记忆","遗忘","压缩","展开","分类","交叉","分析","综合","分割","连接","关系","网络","系统","结构","规律","规则","原则","法律","逻辑","运算","算法","计算","数学","语言","文字","符号","关键词","内容","上下文","翻译","意义","真理","谎言","透明","隐藏","安全","风险","危险","机会","运气","命运","选择","自由","决定","行动","任务","计划","目标","战略","战术","执行","反馈","迭代","优化","完美","完成","失败","成功","进步","趋势","变化","转换","运动","静止","时间","空间","宇宙","奇点","能量","质量","大脑","心智","意识","注意力","专注","呼吸","习惯","主动","被动","自动","同步","异步","顺序","并行","大小","规模","范围","边界","位置","定位","方向","第一","优先","参考","基准","标准","质量等级","资源","成本","价值","价格","利益","动机","需求","体验","感受","情绪","痛苦","快乐","意义感","人生","自我","自己","他人","社会","合作","竞争","信任","金字塔","三角形","圆形","螺旋","音乐","节奏","和谐","熵","秩序","混乱","生命","死亡"];
+/* 注：以上为公开层概念名投影（124 念·去私有内容）；与 vault 万法之网 MOC 同源。 */
+var sky=document.getElementById('sky');
+var today=document.getElementById('today-name');
+var nextBtn=document.getElementById('next-btn');
+if(!sky||!today){return;}
+var REDUCE=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var d=Math.floor(Date.now()/86400000);
+var i=((d%CONCEPTS.length)+CONCEPTS.length)%CONCEPTS.length;
+function render(){
+  sky.innerHTML='';
+  CONCEPTS.forEach(function(c,idx){
+    var s=document.createElement('span');
+    s.className='star'+(idx===i?' lit':'');
+    s.textContent=c;
+    s.title=(idx===i)?'今日之念':'';
+    sky.appendChild(s);
+  });
+  today.textContent=CONCEPTS[i];
+}
+render();
+nextBtn.addEventListener('click',function(){
+  i=(i+1)%CONCEPTS.length;
+  render();
+  if(!REDUCE){today.style.opacity=0;setTimeout(function(){today.style.opacity=1;},200);}
+  today.style.transition=REDUCE?'none':'opacity .35s';
+});
+var tb=document.getElementById('theme-btn');
+function applyTheme(t,save){
+  var night=(t==='night');
+  document.documentElement.classList.toggle('night',night);
+  document.documentElement.classList.toggle('day',!night);
+  tb.textContent=night?'日':'夜';
+  if(save){try{localStorage.setItem('lb-theme',t);}catch(e){}}
+}
+tb.addEventListener('click',function(){applyTheme(document.documentElement.classList.contains('night')?'day':'night',true);});
+})();
+</script>
+</body>
+</html>
