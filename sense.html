@@ -164,6 +164,10 @@
     padding:8px 22px;cursor:pointer;transition:color .4s ease,border-color .4s ease;
   }
   .lamp-btns button:hover,.lamp-btns button:focus-visible{color:var(--accent);border-color:var(--accent-line)}
+  .lamp-themes{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0 2px}
+  .lamp-themes button{font:inherit;font-size:12.5px;letter-spacing:.14em;color:var(--text-3);background:transparent;border:1px solid var(--border);border-radius:999px;padding:5px 14px;cursor:pointer;transition:color .3s,border-color .3s}
+  .lamp-themes button.on{color:var(--accent);border-color:var(--accent-line)}
+  #lamp-lit{margin-left:10px}
   .empty-box{border:1px dashed var(--border-strong);border-radius:16px;padding:32px 26px;text-align:center;
     color:var(--text-2);background:var(--layer1)}
   .empty-box a{font-weight:700}
@@ -450,8 +454,10 @@
     <blockquote id="lamp-text" class="lamp-text">…</blockquote>
     <figcaption class="lamp-meta">摘抄本 · 第 <b id="lamp-no">—</b> / 221 盏</figcaption>
   </figure>
+  <div class="lamp-themes" id="lamp-themes" role="group" aria-label="灯语主题"></div>
   <div class="lamp-btns">
     <button type="button" id="lamp-next">再亮一盏</button>
+    <button type="button" id="lamp-lit">☀ 这盏灯照亮了我</button>
   </div>
   <p class="note">如果你此刻正在黑夜里——愿其中一盏，恰好是你的。</p>
   <p class="sep">❖</p>
@@ -919,6 +925,60 @@ var LAMPS = ["有些东西转瞬即逝，而我将她摘下，留存于此","万
     if(REDUCE){ show(i); return; }
     el.classList.add('fade');
     setTimeout(function(){ show(i); el.classList.remove('fade'); }, 450);
+  }
+  /* 七主题灯（构建期关键词判定） */
+  var THEMES=[
+    ['痛苦',['痛','伤','黑','哭','暗','深渊','裂痕','焚烧','烟']],
+    ['爱',['爱','心','情','恋','暖','点亮','温柔','世界']],
+    ['勇气',['勇','挑战','奋','坚持','行动','赢','努力','天赋','疯狂','改变世界']],
+    ['认识',['知道','懂','理解','思','智慧','本质','知识','学习','看清','问题']],
+    ['选择',['选','决定','命运','自由','路','走','放下','接受','态度']],
+    ['世情',['人','事','世','社会','家','朋友','钱','世俗','江湖','防']],
+    ['时间',['时间','岁月','一生','童年','老','死','明天','昨天','永远','逝']]
+  ];
+  function themeOf(t){
+    var best='世情',score=0;
+    for(var k=0;k<THEMES.length;k++){
+      var s=0,ws=THEMES[k][1];
+      for(var w=0;w<ws.length;w++){ if(t.indexOf(ws[w])>-1) s++; }
+      if(s>score){score=s;best=THEMES[k][0];}
+    }
+    return best;
+  }
+  var themesBox=document.getElementById('lamp-themes');
+  var litBtn=document.getElementById('lamp-lit');
+  var activeTheme=null;
+  var themed=LAMPS.map(function(t){return {t:t,th:themeOf(t)};});
+  if(themesBox){
+    ['全部'].concat(THEMES.map(function(x){return x[0];})).forEach(function(name){
+      var b=document.createElement('button');
+      b.type='button';b.textContent=name;
+      if(name==='全部')b.classList.add('on');
+      b.addEventListener('click',function(){
+        activeTheme=(name==='全部')?null:name;
+        [].forEach.call(themesBox.children,function(c){c.classList.remove('on');});
+        b.classList.add('on');
+        var pool=themed.filter(function(x){return !activeTheme||x.th===activeTheme;});
+        if(!pool.length){return;}
+        var idx=pool.map(function(x){return x.t;}).indexOf(LAMPS[i]);
+        i=pool[((idx<0?0:idx)+1)%pool.length].t?pool.map(function(x){return x.t;}).indexOf(LAMPS[i]):0;
+        i=themed.map(function(x){return x.t;}).indexOf(pool[(idx<0?0:idx)%pool.length].t);
+        if(i<0)i=0;
+        show(i);
+      });
+      themesBox.appendChild(b);
+    });
+  }
+  if(litBtn){
+    litBtn.addEventListener('click',function(){
+      try{
+        var hb=JSON.parse(localStorage.getItem('lb-heartbeats-v1')||'[]');
+        hb.push({ch:'灯语',type:'act',t:Date.now()});
+        localStorage.setItem('lb-heartbeats-v1',JSON.stringify(hb));
+        litBtn.textContent='☀ 已照亮（本机留痕）';
+        setTimeout(function(){litBtn.textContent='☀ 这盏灯照亮了我';},2600);
+      }catch(e){}
+    });
   }
   show(i);
   btn.addEventListener('click', next);
