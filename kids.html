@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FFF6E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171C2A" media="(prefers-color-scheme: dark)">
+<meta name="description" content="《生命之书·给你的城》小朋友版——给 12 岁以下小朋友的身体第一课：你的身体是一座城，八站参观（大脑/心脏/肺/胃/免疫/皮肤/血管/长大），每章一个安全小实验，可与家长共读。零图片依赖、零收集。">
+<title>生命之书 · 给你的城 · 小朋友版</title>
+<style>
+  /* ==========================================================
+     《生命之书·给你的城》小朋友版 v1（2026-08-20）
+     从母书 life-book-public 蒸馏重讲：8 站 × 大字短段 × 纯 CSS 插画 × 安全小实验
+     设计原则：大字号(20px+)·高对比(正文≥12:1)·暖色·零图片·零联网·零收集
+     ========================================================== */
+  :root{
+    --bg:#FFF6E8; --card:#FFFDF4; --ink:#3B2A1E; --ink2:#6E5844;
+    --acc:#B3452C; --acc-deep:#8C3A26; --acc2:#8C3A26; --onacc:#FFF6E9;
+    --ok:#2E7D4F; --warn:#8A6410; --flag:#A03028;
+    --line:#E8D9BE; --try-bg:#FFF3C9; --try-line:#E8C97A;
+    --nav-bg:rgba(255,246,232,.97);
+    --shadow:0 6px 0 rgba(140,58,38,.10);
+    --sel:#F5E7CE;
+  }
+  body.night{
+    --bg:#171C2A; --card:#232A3F; --ink:#F5EDDC; --ink2:#C9BCA6;
+    --acc:#E4B45F; --acc-deep:#C9973F; --acc2:#B98A3A; --onacc:#2A1F10;
+    --ok:#8FD0A8; --warn:#E0C060; --flag:#E58A85;
+    --line:#3A4560; --try-bg:#33301E; --try-line:#6E5F2E;
+    --nav-bg:rgba(23,28,42,.97);
+    --shadow:0 6px 0 rgba(0,0,0,.22);
+    --sel:#33405C;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Yuanti SC','YouYuan','Kaiti SC','STKaiti','KaiTi','PingFang SC','Microsoft YaHei',sans-serif;
+    font-size:21px;line-height:2;letter-spacing:.02em;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--sel)}
+  :focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:8px}
+  button{font-family:inherit}
+
+  /* ---------- 进度条（彩虹小路） ---------- */
+  #progress{position:fixed;top:0;left:0;height:5px;width:0;background:var(--acc);z-index:99;border-radius:0 3px 3px 0}
+
+  /* ---------- 顶部导航 ---------- */
+  #top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:2px;
+    background:var(--nav-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-bottom:3px solid var(--line);padding:6px 14px;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  #top .brand{flex:0 0 auto;font-weight:800;color:var(--acc);font-size:17px;margin-right:10px;white-space:nowrap}
+  #top a{flex:0 0 auto;white-space:nowrap;font-size:17px;line-height:22px;min-height:48px;
+    display:flex;align-items:center;color:var(--ink2);text-decoration:none;
+    padding:0 14px;border-radius:999px}
+  #top a:hover{color:var(--onacc);background:var(--acc)}
+  #top a.p-link{color:var(--acc-deep);border:2px dashed var(--acc);margin-left:6px}
+  #top a.p-link:hover{color:var(--onacc);background:var(--acc)}
+  #top .tools{flex:0 0 auto;display:flex;align-items:center;gap:8px;margin-left:8px;padding-left:12px;border-left:2px solid var(--line)}
+  #night-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--acc2);
+    background:var(--card);cursor:pointer;font-size:21px;line-height:1;padding:0;color:var(--acc)}
+  #night-btn:hover{transform:translateY(-2px)}
+  #night-btn:active{transform:scale(.94)}
+  #tts-speed{height:48px;border-radius:999px;border:2px solid var(--acc2);background:var(--card);
+    color:var(--ink2);cursor:pointer;font-size:15px;line-height:1;padding:0 14px;font-variant-numeric:tabular-nums}
+  #tts-speed[hidden]{display:none}
+
+  main{max-width:760px;margin:0 auto;padding:10px 20px 60px}
+
+  /* ---------- 封面 ---------- */
+  .cover{min-height:88vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:64px 24px 48px}
+  .cover .orn{font-size:34px;letter-spacing:.5em;text-indent:.5em;margin-bottom:26px}
+  .cover h1{font-size:clamp(42px,9vw,66px);line-height:1.25;margin:0;font-weight:800;color:var(--ink)}
+  .cover h1 .t2{display:block;font-size:.62em;color:var(--acc);letter-spacing:.3em;text-indent:.3em;margin-top:10px}
+  .cover .sub{font-size:clamp(19px,3.4vw,24px);color:var(--acc-deep);margin:26px 0 34px;
+    border:3px dashed var(--acc);border-radius:999px;padding:8px 26px;background:var(--card)}
+  .cover .hello{max-width:30em;font-size:21px;color:var(--ink2);line-height:2.1;text-align:center}
+  .cover .hello b{color:var(--acc-deep)}
+  .cover .seal{margin-top:52px;font-size:14px;color:var(--ink2);letter-spacing:.22em;line-height:2}
+
+  /* ---------- 章卡：八站，每站一个颜色屋顶 ---------- */
+  .chapter{background:var(--card);border:3px solid var(--line);border-radius:26px;
+    padding:38px 30px 30px;margin:30px 0;position:relative}
+  .chapter::before{content:"";position:absolute;top:0;left:24px;right:24px;height:12px;
+    background:var(--ch,var(--acc));border-radius:0 0 12px 12px}
+  #k1{--ch:#7C4D9E} #k2{--ch:#B93A47} #k3{--ch:#C05E68} #k4{--ch:#9E6A10}
+  #k5{--ch:#2E7D4F} #k6{--ch:#A2542F} #k7{--ch:#A03D5B} #k8{--ch:#3F7D33} #parents{--ch:#6E5844}
+  body.night #k1{--ch:#B79AE0} body.night #k2{--ch:#E58A93} body.night #k3{--ch:#E8A0A8} body.night #k4{--ch:#E0B060}
+  body.night #k5{--ch:#8FD0A8} body.night #k6{--ch:#E0A276} body.night #k7{--ch:#E39CB2} body.night #k8{--ch:#9FD08C} body.night #parents{--ch:#B4A78E}
+  .ch-no{display:inline-block;font-size:17px;line-height:24px;letter-spacing:.12em;text-indent:.12em;
+    color:#FFFDF4;background:var(--ch);padding:6px 20px;border-radius:999px;margin-bottom:14px;font-weight:700}
+  body.night .ch-no{color:#241A10}
+  .chapter h2{font-size:clamp(30px,5.8vw,42px);line-height:1.35;margin:0 0 4px;font-weight:800;color:var(--ink)}
+  .ch-line{width:96px;height:9px;border-radius:5px;background:var(--ch);margin:8px 0 14px}
+
+  /* ---------- 纯 CSS 插画（零图片依赖：几何图形拼卡通器官） ---------- */
+  .art{position:relative;height:200px;max-width:360px;margin:6px auto 0}
+  .art i{position:absolute;display:block}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  @keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.12)}24%{transform:scale(1)}36%{transform:scale(1.08)}48%{transform:scale(1)}}
+  @keyframes breath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.06)}}
+  @keyframes wobble{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
+  @keyframes patrol{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}
+  @keyframes tremble{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+  @keyframes sense{0%,100%{box-shadow:0 0 0 0 rgba(226,87,76,.45)}55%{box-shadow:0 0 0 13px rgba(226,87,76,0)}}
+  @keyframes drive{from{transform:translateX(0)}to{transform:translateX(148px)}}
+  @keyframes sprout{from{transform:scaleY(.5)}to{transform:scaleY(1)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 8px rgba(247,201,72,.30)}50%{box-shadow:0 0 0 17px rgba(247,201,72,.14)}}
+
+  /* 第一站 · 大脑：皱巴巴的粉核桃 + 冒想法泡泡 */
+  .art-brain .b1{left:50%;top:46px;width:152px;height:108px;margin-left:-76px;background:#F2A9BE;
+    border:5px solid #C4678A;border-radius:46% 54% 52% 48% / 60% 52% 46% 40%}
+  .art-brain .f1{left:50%;top:66px;width:54px;height:26px;margin-left:-44px;border:6px solid #C4678A;
+    border-color:#C4678A transparent transparent transparent;border-radius:50%}
+  .art-brain .f2{left:50%;top:98px;width:48px;height:24px;margin-left:-6px;border:6px solid #C4678A;
+    border-color:transparent transparent #C4678A transparent;border-radius:50%}
+  .art-brain .t1{right:66px;top:18px;width:13px;height:13px;background:#C4678A;border-radius:50%;animation:floaty 3s ease-in-out infinite}
+  .art-brain .t2{right:42px;top:-2px;width:22px;height:22px;background:#F2A9BE;border:4px solid #C4678A;border-radius:50%;animation:floaty 3s .5s ease-in-out infinite}
+
+  /* 第二站 · 心脏：两个圆 + 一个三角形，一起咚咚跳 */
+  .art-heart .hg{left:50%;top:26px;width:150px;height:158px;margin-left:-75px;animation:beat 1.5s ease-in-out infinite}
+  .art-heart .hl,.art-heart .hr{top:0;width:62px;height:62px;background:#E23B4A;border-radius:50%}
+  .art-heart .hl{left:13px}
+  .art-heart .hr{left:69px}
+  .art-heart .hp{left:13px;top:31px;width:0;height:0;
+    border-left:62px solid transparent;border-right:62px solid transparent;border-top:82px solid #E23B4A}
+  .art-heart .base{left:50%;top:186px;width:120px;height:10px;margin-left:-60px;background:var(--line);border-radius:5px}
+
+  /* 第三站 · 肺：两只风箱 + 气管 + 小气泡 */
+  .art-lung .lt{left:50%;top:8px;width:16px;height:38px;margin-left:-8px;background:#ECA3A3;border-radius:8px}
+  .art-lung .lb1{left:calc(50% - 27px);top:36px;width:26px;height:13px;background:#ECA3A3;border-radius:7px;transform:rotate(26deg)}
+  .art-lung .lb2{left:calc(50% + 1px);top:36px;width:26px;height:13px;background:#ECA3A3;border-radius:7px;transform:rotate(-26deg)}
+  .art-lung .ll,.art-lung .lr{top:48px;width:66px;height:104px;background:#F3B3B3;
+    border-radius:52% 48% 44% 46% / 62% 58% 38% 42%;transform-origin:50% 0;animation:breath 3.4s ease-in-out infinite}
+  .art-lung .ll{left:calc(50% - 83px)}
+  .art-lung .lr{left:calc(50% + 17px);animation-delay:.06s}
+  .art-lung .air1{left:calc(50% - 5px);top:56px;width:10px;height:10px;border-radius:50%;background:#9FC8DA;animation:floaty 2.8s ease-in-out infinite}
+  .art-lung .air2{left:calc(50% - 1px);top:44px;width:7px;height:7px;border-radius:50%;background:#9FC8DA;animation:floaty 2.8s .7s ease-in-out infinite}
+
+  /* 第四站 · 胃：会动的口袋 + 绿绿的菜糊糊 */
+  .art-stomach .tube{left:calc(50% - 42px);top:4px;width:16px;height:36px;background:#ECA3A3;border-radius:8px;transform:rotate(14deg)}
+  .art-stomach .body{left:50%;top:32px;width:128px;height:122px;margin-left:-64px;background:#F5B84F;
+    border:5px solid #C8862B;border-radius:44% 56% 50% 50% / 58% 46% 58% 42%;animation:wobble 4s ease-in-out infinite}
+  .art-stomach .juice{left:50%;top:90px;width:92px;height:40px;margin-left:-46px;background:#A9CB7C;border-radius:44%}
+  .art-stomach .bub1{left:calc(50% - 18px);top:94px;width:12px;height:12px;background:#DCEFC2;border-radius:50%}
+  .art-stomach .bub2{left:calc(50% + 10px);top:102px;width:8px;height:8px;background:#DCEFC2;border-radius:50%}
+
+  /* 第五站 · 免疫：白卫兵（圆+核点）追小病毒（圆+刺） */
+  .art-immune .wbc{left:calc(50% - 76px);top:48px;width:96px;height:96px;background:#F2F8FE;
+    border:5px solid #7FB0DC;border-radius:50%;animation:patrol 4s ease-in-out infinite}
+  .art-immune .d1,.art-immune .d2,.art-immune .d3{background:#7FB0DC;border-radius:50%;width:15px;height:15px}
+  .art-immune .d1{left:calc(50% - 50px);top:78px}
+  .art-immune .d2{left:calc(50% - 32px);top:100px}
+  .art-immune .d3{left:calc(50% - 46px);top:108px}
+  .art-immune .vir{left:calc(50% + 20px);top:88px;width:46px;height:46px;background:#9BC93C;
+    border:4px solid #79A82E;border-radius:50%;animation:tremble 1s ease-in-out infinite}
+  .art-immune .s1{left:calc(50% + 38px);top:72px;width:10px;height:14px;background:#79A82E;border-radius:5px}
+  .art-immune .s2{left:calc(50% + 56px);top:100px;width:14px;height:10px;background:#79A82E;border-radius:5px}
+  .art-immune .s3{left:calc(50% + 24px);top:122px;width:12px;height:10px;background:#79A82E;border-radius:5px;transform:rotate(40deg)}
+  .art-immune .s4{left:calc(50% + 14px);top:82px;width:10px;height:12px;background:#79A82E;border-radius:5px;transform:rotate(-30deg)}
+
+  /* 第六站 · 皮肤：砖头城墙 + 三个报警的小警铃 */
+  .art-skin .wall{left:50%;top:46px;width:258px;height:110px;margin-left:-129px;background-color:#EFC092;
+    background-image:
+      repeating-linear-gradient(0deg,transparent 0 33px,#C98A5B 33px 38px),
+      repeating-linear-gradient(90deg,transparent 0 48px,#C98A5B 48px 53px);
+    border:5px solid #B97B4E;border-radius:12px}
+  .art-skin .sn1,.art-skin .sn2,.art-skin .sn3{width:20px;height:20px;background:#E2574C;border-radius:50%;animation:sense 2.4s ease-in-out infinite}
+  .art-skin .sn1{left:calc(50% - 72px);top:72px}
+  .art-skin .sn2{left:calc(50% - 8px);top:98px;animation-delay:.8s}
+  .art-skin .sn3{left:calc(50% + 56px);top:64px;animation-delay:1.6s}
+
+  /* 第七站 · 血管：糖果斑马马路 + 一个红细胞甜甜圈跑跑 */
+  .art-vessel .r1{left:calc(50% - 130px);top:46px;width:172px;height:30px;border-radius:15px;transform:rotate(9deg);
+    background:repeating-linear-gradient(90deg,#F6DADA 0 22px,#EFA9A9 22px 44px)}
+  .art-vessel .r2{left:calc(50% - 62px);top:106px;width:192px;height:30px;border-radius:15px;transform:rotate(-8deg);
+    background:repeating-linear-gradient(90deg,#F6DADA 0 22px,#EFA9A9 22px 44px)}
+  .art-vessel .cell{top:88px;left:calc(50% - 108px);width:46px;height:46px;border-radius:50%;
+    border:13px solid #D93B4B;background:#FBE7E8;animation:drive 5s ease-in-out infinite alternate}
+
+  /* 第八站 · 长大：泥土 + 长高的芽 + 太阳 */
+  .art-grow .soil{left:50%;top:150px;width:238px;height:20px;margin-left:-119px;background:#C08A57;border-radius:10px}
+  .art-grow .stem{left:50%;top:78px;width:12px;height:74px;margin-left:-6px;background:#5B9B3F;border-radius:6px;
+    transform-origin:50% 100%;animation:sprout 5s ease-in-out infinite alternate}
+  .art-grow .lf1{left:calc(50% + 5px);top:74px;width:48px;height:26px;background:#79B653;border-radius:2px 100% 2px 100%;transform:rotate(-16deg)}
+  .art-grow .lf2{left:calc(50% - 53px);top:98px;width:40px;height:22px;background:#6BAA48;border-radius:100% 2px 100% 2px;transform:rotate(-12deg)}
+  .art-grow .sun{left:calc(50% + 86px);top:8px;width:46px;height:46px;border-radius:50%;background:#F7C948;
+    animation:glow 3s ease-in-out infinite}
+
+  .cap{text-align:center;font-size:18px;color:var(--ink2);letter-spacing:.04em;margin:0 0 16px}
+  .story p{margin:0 0 16px;font-size:22px;line-height:2.05}
+  .story p:last-child{margin-bottom:0}
+  .story b{color:var(--acc-deep)}
+
+  /* 小朋友试试看 */
+  .try{background:var(--try-bg);border:3px dashed var(--try-line);border-radius:20px;padding:18px 22px;margin:22px 0 0}
+  .try .try-t{font-size:21px;font-weight:800;color:var(--warn);margin-bottom:8px}
+  .try .try-b{font-size:19px;line-height:1.95}
+
+  /* 每章朗读钮（复用母书 v2.0 朗读器核心） */
+  .read-btn{display:block;margin:20px auto 0;min-height:56px;padding:0 30px;border-radius:999px;
+    background:var(--acc);color:var(--onacc);font-size:20px;font-weight:700;border:0;cursor:pointer;
+    box-shadow:0 5px 0 var(--acc2)}
+  .read-btn:hover{transform:translateY(-2px)}
+  .read-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--acc2)}
+  .read-btn.on{background:var(--ok);box-shadow:0 5px 0 rgba(0,0,0,.25)}
+  .read-btn[hidden]{display:none}
+  .chapter.reading{outline:4px solid var(--ch);outline-offset:4px}
+
+  /* ---------- 给家长的一页 ---------- */
+  .parents{padding-bottom:34px}
+  .pbox h3{font-size:21px;margin:26px 0 8px;color:var(--ch);font-weight:800}
+  .pbox p,.pbox li{font-size:17.5px;line-height:1.95;color:var(--ink)}
+  .pbox ul{padding-left:1.5em;margin:6px 0}
+  .pbox li{margin:7px 0}
+  .pbox .flags{list-style:none;padding-left:0;border:3px solid var(--flag);border-radius:18px;
+    padding:16px 20px;background:rgba(160,48,40,.06)}
+  .pbox .flags li{color:var(--flag);font-weight:600}
+  .pbox .flags li::before{content:"⚠️ ";margin-right:4px}
+  .pbox a{color:var(--acc-deep)}
+
+  footer{text-align:center;font-size:14px;line-height:2;color:var(--ink2);
+    border-top:3px solid var(--line);margin-top:44px;padding:28px 20px 44px;letter-spacing:.03em}
+
+  @media (max-width:640px){
+    body{font-size:20px}
+    .story p{font-size:21px}
+    .chapter{padding:34px 20px 24px;border-radius:22px}
+    .art{height:184px;transform:scale(.92);transform-origin:top center;margin-bottom:-12px}
+    .cover h1{letter-spacing:.06em}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .art i{animation:none!important}
+    #night-btn:hover,.read-btn:hover{transform:none}
+  }
+  @media print{
+    #top,#progress,.read-btn{display:none!important}
+    body{background:#fff;color:#000}
+    .chapter{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<nav id="top" aria-label="小城地图">
+  <span class="brand">🏙️ 给你的城</span>
+  <a href="#k1">大脑</a>
+  <a href="#k2">心脏</a>
+  <a href="#k3">肺</a>
+  <a href="#k4">胃</a>
+  <a href="#k5">卫队</a>
+  <a href="#k6">皮肤</a>
+  <a href="#k7">血管</a>
+  <a href="#k8">长大</a>
+  <a class="p-link" href="#parents">家长页</a>
+  <span class="tools">
+    <button id="tts-speed" hidden aria-label="朗读速度 1.0 倍" title="朗读速度">×1.0</button>
+    <button id="night-btn" aria-label="让天黑下来" aria-pressed="false" title="让天黑下来">🌙</button>
+  </span>
+</nav>
+
+<header class="cover">
+  <div class="orn" aria-hidden="true">⭐ 🏙️ ⭐</div>
+  <h1>生命之书<span class="t2">给你的城</span></h1>
+  <div class="sub">小朋友版 · 第一册</div>
+  <p class="hello">你好呀！这本书要带你参观一座神奇的城——<b>你自己的身体</b>。<br>
+  城里有市长、发电站、风箱、厨房、卫队、城墙，还有绕地球两圈半的马路，一共八站。<br>
+  每一站读完，都有一个「小朋友试试看」的小游戏。<br>
+  牵着爸爸妈妈的手，出发！</p>
+  <div class="seal">和爸爸妈妈一起读 · XYZ 星际疗愈工程 · 2026 · v1</div>
+</header>
+
+<main>
+
+<!-- ================= 第一站 · 市长大脑 ================= -->
+<section class="chapter" id="k1">
+  <div class="ch-no">第 一 站</div>
+  <h2>市长大脑</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-brain" aria-hidden="true">
+    <i class="b1"></i><i class="f1"></i><i class="f2"></i><i class="t1"></i><i class="t2"></i>
+  </div>
+  <div class="cap">🧠 市长 · ⚡ 永远亮灯 · 💤 夜里开会</div>
+  <div class="story">
+    <p>你的城里住着一位市长——大脑。它住在最高的塔楼（你的头）里，皱巴巴的，像一个大核桃，和一只大菠萝差不多重。</p>
+    <p>全城的大事小事都归它管：你跑步，它下令；你写字，它指挥；连你做梦，它都还在开会。</p>
+    <p>市长虽然个子小，却用掉全城五分之一的电——所以市长办公室<b>永远亮着灯</b>。</p>
+    <p>睡觉就是市长的夜间工程：把白天学的东西归档，把垃圾运走。睡够觉，明天的你更聪明。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 闭眼单脚站</div>
+    <div class="try-b">扶着墙或牵住大人的手，闭上眼睛，单脚站 10 秒。是不是摇摇晃晃？平时是市长悄悄用耳朵和全身的感觉帮你保持平衡——它每天都在做这么难的工作。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第一站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第二站 · 发电站心脏 ================= -->
+<section class="chapter" id="k2">
+  <div class="ch-no">第 二 站</div>
+  <h2>发电站心脏</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-heart" aria-hidden="true">
+    <i class="hg"><i class="hl"></i><i class="hr"></i><i class="hp"></i></i>
+    <i class="base"></i>
+  </div>
+  <div class="cap">❤️ 发电站 · 🥁 咚咚鼓声 · 🚚 血液快递</div>
+  <div class="story">
+    <p>城的正中央有一座发电站——心脏，比你的拳头大一点点。</p>
+    <p>它每天跳大约十万次，<b>从不请假，从不熄火</b>。</p>
+    <p>每跳一下，就把新鲜的血液送往全城——血液是城的快递队，把氧气和饭送到每一位市民（细胞）手里。</p>
+    <p>你奔跑时，发电站加速咚咚；你睡着时，它放慢速度，轻轻值班。</p>
+    <p>把手放在胸口左边，那咚、咚、咚的鼓声，就是它在跟你打招呼。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 摸一摸脉搏</div>
+    <div class="try-b">两根手指（不是大拇指）轻放在手腕内侧、靠大拇指那一侧，找到咚咚的跳动，数 15 秒再乘以 4。安静坐着时，大约每分钟 70–100 下。跑完步再数一次，比一比。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第二站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第三站 · 风箱肺 ================= -->
+<section class="chapter" id="k3">
+  <div class="ch-no">第 三 站</div>
+  <h2>风箱肺</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-lung" aria-hidden="true">
+    <i class="lt"></i><i class="lb1"></i><i class="lb2"></i><i class="ll"></i><i class="lr"></i><i class="air1"></i><i class="air2"></i>
+  </div>
+  <div class="cap">🌬️ 风箱 · 🟢 氧气宝贝 · 👃 大门鼻孔</div>
+  <div class="story">
+    <p>肺是城里的风箱，一左一右，藏在你的胸腔里，像两块软软的海绵。</p>
+    <p>它们一胀一缩，一刻不停：吸气，把新鲜空气迎进城；呼气，把用过的气送出门。</p>
+    <p>空气里有个宝贝叫<b>氧气</b>，全城市民都靠它吃饭。</p>
+    <p>鼻子是空气的大门，鼻毛和鼻涕负责挡灰尘——别嫌弃鼻涕，它们是尽职的门卫。</p>
+    <p>你大哭或大笑之后会大口喘气——那是风箱在加班，帮你把气补回来。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 深呼吸三次</div>
+    <div class="try-b">用鼻子慢慢吸气，数 1、2、3、4；再用嘴巴慢慢呼气，数 1 到 6。呼气比吸气长，心跳会慢慢安静下来——紧张的时候，这是你的小魔法。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第三站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第四站 · 厨房胃 ================= -->
+<section class="chapter" id="k4">
+  <div class="ch-no">第 四 站</div>
+  <h2>厨房胃</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-stomach" aria-hidden="true">
+    <i class="tube"></i><i class="body"></i><i class="juice"></i><i class="bub1"></i><i class="bub2"></i>
+  </div>
+  <div class="cap">🍲 厨房 · 🦷 牙齿切小 · 🥣 揉成糊糊</div>
+  <div class="story">
+    <p>胃是城里的厨房，一个会动的口袋，藏在肚子左边。</p>
+    <p>你吃下去的饭先被牙齿切小，再顺着滑梯（食道）进入厨房。</p>
+    <p>胃像揉面师傅，把食物揉来揉去，加上厉害的胃酸，把饭慢慢<b>变成糊糊</b>。</p>
+    <p>糊糊再送去小肠——真正的吸收大厅：营养在那里上车，运往全城。</p>
+    <p>所以吃饭要慢慢嚼，嚼得越碎，厨房越轻松；吃完饭别立刻疯跑，厨房会抗议哦。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 嚼二十下</div>
+    <div class="try-b">下一口饭，数着嚼 20 下再咽下去。听听咀嚼的声音，感受饭一点点变碎。你的胃厨房会说：谢谢！</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第四站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第五站 · 看不见的卫队 ================= -->
+<section class="chapter" id="k5">
+  <div class="ch-no">第 五 站</div>
+  <h2>看不见的卫队</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-immune" aria-hidden="true">
+    <i class="wbc"></i><i class="d1"></i><i class="d2"></i><i class="d3"></i>
+    <i class="vir"></i><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i>
+  </div>
+  <div class="cap">🛡️ 卫队巡逻 · 🔍 记住坏蛋 · 💉 疫苗演习</div>
+  <div class="story">
+    <p>城里驻着一支看不见的卫队——免疫系统。</p>
+    <p>白细胞是卫队士兵，在血液和身体里日夜巡逻。</p>
+    <p>细菌或病毒溜进来，卫队立刻包围它们、吞掉它们，还会<b>记住它们的长相</b>。</p>
+    <p>记住敌人是卫队最厉害的本事：下次同一个坏蛋再来，一秒认出、马上打败。疫苗就是提前给卫队看敌人的「通缉照片」——先演习，后实战。</p>
+    <p>发烧常常是卫队在打仗：城里升温，敌人不好受。打仗辛苦，但一直高烧就要请医生帮忙。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 洗手 20 秒</div>
+    <div class="try-b">打开水龙头，唱两遍《生日歌》：手心、手背、指缝、指尖全都搓到。这是你能帮卫队做的最酷的事。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第五站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第六站 · 城墙皮肤 ================= -->
+<section class="chapter" id="k6">
+  <div class="ch-no">第 六 站</div>
+  <h2>城墙皮肤</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-skin" aria-hidden="true">
+    <i class="wall"></i><i class="sn1"></i><i class="sn2"></i><i class="sn3"></i>
+  </div>
+  <div class="cap">🧱 城墙 · 🚨 小警报器 · 🌞 怕晒伤</div>
+  <div class="story">
+    <p>皮肤是城的城墙，把你从头到脚包起来，展开有<b>一张小床那么大</b>。</p>
+    <p>城墙有三件宝：挡住细菌、锁住水分、感觉冷热痛痒。</p>
+    <p>蚊子刚落下你就觉得痒——那是城墙在拉警报。</p>
+    <p>城墙上还住着许多友好的小居民（好细菌），帮着站岗，别总用杀菌的东西赶走它们。</p>
+    <p>出太阳的日子，城墙需要帽子和防晒衣，它最怕晒伤。小伤口会自己长好，结的痂是城墙搭的施工围栏——忍住，别抠它。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 找警报器</div>
+    <div class="try-b">用指尖轻轻碰一碰手臂、手背、指尖，比一比哪里最灵敏。指尖赢了吗？那里装了最多的「小警报器」。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第六站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第七站 · 马路血管 ================= -->
+<section class="chapter" id="k7">
+  <div class="ch-no">第 七 站</div>
+  <h2>马路血管</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-vessel" aria-hidden="true">
+    <i class="r1"></i><i class="r2"></i><i class="cell"></i>
+  </div>
+  <div class="cap">🛣️ 十万公里 · 🚕 快递车 · 🩹 修路队</div>
+  <div class="story">
+    <p>城里铺满了马路——血管，全长约十万公里，<b>能绕地球两圈半</b>。</p>
+    <p>大动脉是高速公路，静脉是回程大道，毛细血管是比头发还细的小巷。</p>
+    <p>红色的快递车（红细胞）日夜跑在马路上：送去氧气，捎走垃圾。</p>
+    <p>不小心划破手，流出的血就是快递车临时改道涌了出来。很快修路队（血小板）赶到堵住缺口——结的痂，就是它们立的路障。</p>
+    <p>心脏每跳一下，快递队就出发一批。你一跑步，全城马路一起提速。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 指尖小实验</div>
+    <div class="try-b">轻轻按住指尖 3 秒，松开。看到它先变白、又变粉红了吗？那是快递车（血液）马上赶回来了——一秒都不迟到。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第七站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 第八站 · 你会长大 ================= -->
+<section class="chapter" id="k8">
+  <div class="ch-no">第 八 站</div>
+  <h2>你会长大</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="art art-grow" aria-hidden="true">
+    <i class="sun"></i><i class="stem"></i><i class="lf1"></i><i class="lf2"></i><i class="soil"></i>
+  </div>
+  <div class="cap">🌱 长大施工 · 😴 夜里开工 · 🥗 真食物</div>
+  <div class="story">
+    <p>这座城最神奇的本事：它会<b>自己长大</b>。</p>
+    <p>你出生时只有一点点大，现在会跑会跳会认字——都是城在大施工：骨头一节节加长，肌肉一遍遍加固。</p>
+    <p>施工队夜里才开工（生长激素在深睡眠里上班），材料要靠真食物：饭、菜、蛋、奶、水果。</p>
+    <p>城里的市民还会换新：老的退休，新的出生，几个月就换一批。</p>
+    <p>好好吃饭、好好睡觉、天天去外面玩——你已经是这座城最好的市长啦。</p>
+  </div>
+  <div class="try">
+    <div class="try-t">🎯 小朋友试试看 · 晚安，城</div>
+    <div class="try-b">今晚早点睡，睡前对城说一句「晚安，辛苦啦」。再请爸爸妈妈帮你在这个月的日历上记下身高——明年再量一次，比一比你的城长高了多少。</div>
+  </div>
+  <button class="read-btn" type="button" aria-label="朗读第八站">🔊 听这一站</button>
+</section>
+
+<!-- ================= 给家长的一页 ================= -->
+<section class="chapter parents" id="parents">
+  <div class="ch-no">给家长的一页</div>
+  <h2>共读指南与红旗速查</h2>
+  <div class="ch-line" aria-hidden="true"></div>
+  <div class="pbox">
+    <h3>这本书是什么</h3>
+    <p>《生命之书·给你的城》是从公开版《生命之书》蒸馏重讲的儿童版（不是缩写）：把「身体是一座城」的母题拆成八站，每章 150–250 字、一幅纯 CSS 几何插画、一个安全小实验。适合 5–12 岁亲子共读，每章约 5 分钟；朗读按钮可整章读给孩子听（三档语速）。</p>
+    <h3>怎么一起读</h3>
+    <ul>
+      <li>跟着孩子的兴趣走，不必按顺序；想先读哪站，就先参观哪站。</li>
+      <li>「试试看」一起做：摸脉搏、深呼吸、洗手 20 秒——身体经验比讲解记得牢。</li>
+      <li>被问倒了就诚实说「我们一起查」——示范「不知道」，比假装知道更珍贵。</li>
+      <li>把比喻用进日常：吃饭时说「厨房开工了」，睡前说「市长要开夜间会议了」。</li>
+      <li>孩子问生病与死亡时不回避、不吓唬：用书里的语言（卫队打仗、市民换新）接住情绪；持续担忧时寻求医生与专业支持。</li>
+    </ul>
+    <h3>红旗速查：出现以下情况请及时就医</h3>
+    <ul class="flags">
+      <li>呼吸急促、费力，或嘴唇、面色发紫；</li>
+      <li>精神明显变差：叫不醒、异常安静、哭声微弱；3 个月以下婴儿发热直接就医；</li>
+      <li>高热不退，或发热超过 3 天无好转趋势；</li>
+      <li>脱水迹象：8 小时以上无尿、哭时无泪、口唇极干；</li>
+      <li>皮疹伴高热，或皮肤出现按压不褪色的红点、瘀斑；</li>
+      <li>抽搐、剧烈头痛、脖子发硬、持续呕吐；</li>
+      <li>误吞异物或药物、烫伤面积大于孩子手掌、出血按压不止；</li>
+      <li>拿不准就去医院或拨打急救电话（中国大陆 120）——早发现，修得省。</li>
+    </ul>
+    <h3>三句边界与隐私</h3>
+    <p>① 本书为亲子健康科普，不能替代医生的诊断和治疗；② 书中数字是帮孩子建立直觉的约数；③ 本书不收集任何信息——朗读、动画、夜读模式全部在本地运行，无联网、无统计、无账号。</p>
+    <h3>想挖深一层？</h3>
+    <p>每个比喻背后的科学、红旗的完整清单与循证出处，见母书《生命之书》公开版（<a href="./life-book-public-v2.0.html">life-book-public-v2.0.html</a>）——每章末还可以给母书「写心跳」，帮它长大。</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  《生命之书 · 给你的城》· 小朋友版 v1（2026-08-20：八站+共读指南+CSS 插画成书）<br>
+  XYZ 星际疗愈工程 · 2026<br>
+  亲子科普 · 不替代医疗诊断 · 红旗症状请就医 · 本书零收集
+</footer>
+
+<script>
+(function(){
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var body = document.body;
+
+  /* ============ 夜读模式（睡前共读友好） ============ */
+  var nightBtn = document.getElementById('night-btn');
+  function syncNight(on){
+    if(!nightBtn) return;
+    nightBtn.textContent = on ? '☀️' : '🌙';
+    nightBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    nightBtn.setAttribute('aria-label', on ? '让天亮起来' : '让天黑下来');
+  }
+  function applyNight(on){ body.classList.toggle('night', on); syncNight(on); }
+  var stored = null;
+  try{ stored = localStorage.getItem('lbk-night'); }catch(e){}
+  if(stored === '1' || (stored === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+    applyNight(true);
+  }
+  if(nightBtn){
+    nightBtn.addEventListener('click', function(){
+      var on = !body.classList.contains('night');
+      applyNight(on);
+      try{ localStorage.setItem('lbk-night', on ? '1' : '0'); }catch(e){}
+    });
+  }
+
+  /* ============ 阅读进度（彩虹小路） ============ */
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+  onScroll();
+
+  /* ============ 朗读器（复用母书 v2.0 朗读器核心：中文 voice 回退链 · 三档语速 ·
+     无语音环境自动隐藏 · 引擎静默失败兜底 · 切走即停） ============ */
+  var synth = window.speechSynthesis;
+  var ttsOK = !!(synth && 'SpeechSynthesisUtterance' in window);
+  var speedBtn = document.getElementById('tts-speed');
+  var readBtns = [].slice.call(document.querySelectorAll('.read-btn'));
+  var rate = 1.0, voice = null, cur = null;   /* cur = {btn, sec} */
+
+  if(!ttsOK){
+    readBtns.forEach(function(b){ b.hidden = true; });   /* 无语音环境：隐藏，零报错 */
+  }else{
+    function pickVoice(){
+      var vs = synth.getVoices();
+      if(!vs || !vs.length) return null;
+      var zh = vs.filter(function(v){ return /^zh/i.test(v.lang || ''); });
+      return zh.filter(function(v){ return /zh[-_]cn/i.test(v.lang); })[0]
+          || zh[0]
+          || vs.filter(function(v){ return /Chinese|中文|Mandarin|普通话/i.test(v.name || ''); })[0]
+          || null;
+    }
+    voice = pickVoice();
+    if(typeof synth.onvoiceschanged !== 'undefined'){ try{ synth.onvoiceschanged = function(){ voice = pickVoice(); }; }catch(e){} }
+    setTimeout(function(){ voice = pickVoice(); }, 600);   /* voices 异步加载：再补一次 */
+
+    function stop(){
+      try{ synth.cancel(); }catch(e){}
+      if(cur){
+        cur.btn.textContent = '🔊 听这一站';
+        cur.btn.classList.remove('on');
+        cur.sec.classList.remove('reading');
+        cur = null;
+      }
+      if(speedBtn) speedBtn.hidden = true;
+    }
+    function read(btn){
+      var sec = btn.closest('section.chapter');
+      if(cur && cur.btn === btn){ stop(); return; }
+      stop();
+      var parts = [].slice.call(sec.querySelectorAll('.story, .try .try-b'));
+      var text = parts.map(function(el){ return el.innerText || el.textContent || ''; }).join(' ')
+        .replace(/\s+/g, ' ').trim();
+      if(!text) return;
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      if(voice) u.voice = voice;
+      u.rate = rate; u.pitch = 1;
+      u.onend = function(){ if(cur && cur.btn === btn) stop(); };
+      u.onerror = function(){ if(cur && cur.btn === btn) stop(); };
+      cur = { btn:btn, sec:sec };
+      btn.textContent = '⏸ 先停一下';
+      btn.classList.add('on');
+      sec.classList.add('reading');
+      if(speedBtn) speedBtn.hidden = false;
+      synth.speak(u);
+      setTimeout(function(){          /* 兜底：引擎静默失败时退出 */
+        if(cur && cur.btn === btn && !synth.speaking && !synth.pending) stop();
+      }, 2400);
+    }
+    readBtns.forEach(function(b){ b.addEventListener('click', function(){ read(b); }); });
+    if(speedBtn){
+      speedBtn.addEventListener('click', function(){
+        var rates = [0.8, 1.0, 1.2];
+        var i = rates.indexOf(rate);
+        rate = rates[(i + 1) % rates.length];
+        speedBtn.textContent = '×' + rate.toFixed(1);
+        speedBtn.setAttribute('aria-label', '朗读速度 ' + rate.toFixed(1) + ' 倍');
+        if(cur){ var b = cur.btn; stop(); read(b); }   /* 以新语速重读当前站 */
+      });
+    }
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+  }
+})();
+</script>
+</body>
+</html>

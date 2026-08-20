@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="description" content="《生命之书·感知》——书的神经末梢。聚合读者心跳与未命中疑问，显影"我们此刻最不懂什么"；证据保鲜扫描与感知输入接口。数据全在本设备。">
+<title>生命之书 · 感知</title>
+<style>
+  /* ==========================================================
+     《生命之书·感知》v5.0-wip —— 与主书同族的设计系统
+     白昼之书 × 星空之书 · 复用主书 v1 设计 token（日 16 + 夜 15）
+     零外部依赖 · 单文件自包含 · 44px 触达 · 680px 阅读栏
+     视觉母题：神经末梢——页首触须摆动，感知到信号即微光
+     ========================================================== */
+  :root{
+    /* ---- 白昼之书（日间主题） ---- */
+    --paper:#FAF6EF; --layer1:#F3ECDF; --layer2:#EBE1CF; --layer3:#E2D5BD;
+    --ink:#2A2622; --ink2:#6B6154; --ink3:#4A443C;
+    --cinnabar:#B3452C; --cinnabar-deep:#9A3A24;
+    --success:#3E7A52; --success-deep:#2C5C3E;
+    --warning:#9A6B1F; --warning-deep:#8A5F1A;
+    --flag:#A03028; --link:#8C4510; --selbg:#F5E7CE;
+    --border:#D9CDB9; --border-strong:#99855F; --disabled:#A69C8B;
+    --p2:#A05B3A; --p3:#3E7A52; --p4:#2E5F8A; --p5:#4A3F7A; --p6:#2F6FB0; --p7:#7A5A2E;
+    /* ---- 语义别名 ---- */
+    --bg:var(--paper); --text:var(--ink); --text-2:var(--ink2); --text-3:var(--ink3);
+    --accent:var(--cinnabar); --accent-deep:var(--cinnabar-deep); --accent-line:var(--warning);
+    --btn-bg:var(--layer1); --panel-bg:var(--layer1);
+    --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-8:32px;
+    --ease-enter:cubic-bezier(.16,1,.3,1); --ease-hover:cubic-bezier(.4,0,.2,1);
+    --dur-small:120ms; --dur-medium:300ms; --dur-large:700ms;
+    --measure:680px; --tap:44px;
+  }
+  body.night{
+    /* ---- 星空之书（夜间主题） ---- */
+    --space:#0B1220; --layer1:#111A2B; --layer2:#182338; --layer3:#1F2D47;
+    --star:#E8E4D8; --star2:#9FA093; --gold:#D4A94E; --gold-dim:#B8933F;
+    --success:#8CC29A; --warning:#E0B458; --flag:#E07B5A; --link:#9EC1E8; --selbg:#24354F;
+    --border:#2B3A54; --border-strong:#55698F; --disabled:#4E5B72;
+    --p2:#C8906F; --p3:#7FA98C; --p4:#7BA3C4; --p5:#8D82C9; --p6:#7FB4E0; --p7:#D4B36A;
+    --bg:var(--space); --text:var(--star); --text-2:var(--star2); --text-3:var(--star);
+    --accent:var(--gold); --accent-deep:var(--gold-dim); --accent-line:var(--gold);
+    --btn-bg:var(--layer1); --panel-bg:var(--layer1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:Georgia,'Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong','SimSun',serif;
+    font-size:18px;line-height:32px;letter-spacing:.01em;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--selbg)}
+  :focus-visible{outline:2px solid var(--border-strong);outline-offset:2px}
+  a{color:var(--link)}
+  a:hover{color:var(--accent-deep)}
+
+  /* ---------- 吸顶导航（同族目录条） ---------- */
+  #toc{position:sticky;top:0;z-index:50;display:flex;align-items:center;
+    background:var(--paper);background:color-mix(in srgb,var(--bg) 96%,transparent);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  body.night #toc{background:var(--space);background:color-mix(in srgb,var(--bg) 94%,transparent)}
+  #toc .bar{flex:1 1 auto;min-width:0;max-width:980px;margin:0 auto;display:flex;align-items:center;gap:2px;
+    overflow-x:auto;padding:6px 16px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  #toc .bar::-webkit-scrollbar{height:4px}
+  #toc .bar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  #toc .brand{flex:0 0 auto;font-weight:700;color:var(--accent);font-size:14px;margin-right:12px;letter-spacing:.1em;white-space:nowrap}
+  #toc a{flex:0 0 auto;white-space:nowrap;font-size:13px;line-height:20px;min-height:44px;
+    display:flex;align-items:center;color:var(--text-2);text-decoration:none;padding:0 14px;border-radius:999px}
+  #toc a:hover{color:var(--accent-deep);background:var(--layer1)}
+  #toc a.active{color:var(--bg);background:var(--accent)}
+  #toc .tools{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:0 16px;border-left:1px solid var(--border)}
+  #night-btn{width:var(--tap);height:var(--tap);border-radius:50%;border:1px solid var(--border-strong);
+    background:var(--btn-bg);cursor:pointer;font-size:17px;line-height:1;padding:0;color:var(--accent);
+    transition:transform var(--dur-small) var(--ease-hover)}
+  #night-btn:hover{transform:translateY(-1px)}
+  #night-btn:active{transform:scale(.96)}
+
+  /* ---------- 封面（同族封面 + 神经末梢母题） ---------- */
+  .cover{max-width:980px;margin:0 auto;padding:72px 24px 64px;text-align:center;background:
+    radial-gradient(1100px 500px at 50% -8%, var(--layer1) 0%, rgba(243,236,223,0) 60%),
+    radial-gradient(900px 600px at 85% 110%, var(--layer2) 0%, rgba(235,225,207,0) 55%),
+    var(--bg)}
+  body.night .cover{background:
+    radial-gradient(1100px 500px at 50% -8%, var(--layer1) 0%, rgba(17,26,43,0) 60%),
+    radial-gradient(900px 600px at 85% 110%, var(--layer2) 0%, rgba(11,18,32,0) 55%),
+    var(--bg)}
+  .cover h1{font-size:clamp(36px,7vw,56px);line-height:1.2;margin:18px 0 16px;letter-spacing:.22em;text-indent:.22em;
+    font-weight:700;color:var(--text)}
+  .cover .subtitle{font-size:clamp(15px,3vw,20px);color:var(--accent-deep);letter-spacing:.14em;margin-bottom:44px}
+  .cover .rule{width:64px;height:1px;background:var(--accent-line);margin:0 auto 40px}
+  .cover .mission{max-width:34em;font-size:clamp(15px,3vw,18px);color:var(--text-2);line-height:2.1;margin:0 auto}
+  .cover .seal{margin-top:56px;font-size:12px;color:var(--text-3);letter-spacing:.28em;line-height:2.2}
+
+  /* ---------- 神经末梢（页首触须动画 · 感知到信号即微光） ---------- */
+  #nerve{width:100%;max-width:560px;height:auto;display:block;margin:0 auto -34px}
+  .tendril{fill:none;stroke:var(--border-strong);stroke-width:1.3;stroke-linecap:round;opacity:.7;
+    transform-origin:340px 150px;animation:sway 7s var(--ease-hover) infinite alternate}
+  .tip{fill:var(--accent);opacity:.85;transform-box:fill-box;transform-origin:center;
+    transition:transform .18s var(--ease-enter),opacity .18s}
+  .tip.glow{transform:scale(2.4);opacity:1;filter:drop-shadow(0 0 7px var(--accent))}
+  .tip.halo{animation:halo .9s var(--ease-enter) 1}
+  @keyframes sway{from{transform:rotate(-1.3deg)}to{transform:rotate(1.3deg)}}
+  @keyframes halo{0%{transform:scale(1)}45%{transform:scale(2.6)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){
+    .tendril{animation:none}
+    .tip.halo{animation:none}
+  }
+
+  /* ---------- 正文区 ---------- */
+  main{max-width:var(--measure);margin:0 auto;padding:0 24px 32px}
+  section.chapter{margin:0 0 72px}
+  .ch-no{display:inline-block;font-size:13px;letter-spacing:.3em;color:var(--accent-deep);
+    border:1px solid var(--border-strong);border-radius:999px;padding:2px 14px 2px 17px;margin-bottom:14px}
+  h2{font-size:clamp(24px,4.5vw,31px);line-height:1.4;margin:0 0 22px;letter-spacing:.04em}
+  h3{font-size:21px;line-height:1.5;margin:36px 0 12px;color:var(--text)}
+  p{margin:0 0 18px}
+  .note{font-size:13.5px;line-height:22px;color:var(--text-2)}
+  .sep{text-align:center;color:var(--accent-line);letter-spacing:1.2em;margin-left:1.2em;font-size:15px}
+  blockquote{margin:24px 0;padding:16px 22px;border-left:3px solid var(--accent-line);
+    background:var(--layer2);border-radius:0 12px 12px 0}
+  blockquote p{margin:0;font-size:17px;line-height:30px}
+  blockquote p+p{margin-top:10px}
+
+  /* ---------- 疑问显影 ---------- */
+  .grow-box{border:1px solid var(--border-strong);border-radius:16px;
+    background:linear-gradient(160deg,var(--layer1),var(--bg));
+    padding:28px 26px;margin:8px 0 24px}
+  .grow-box .g-text{font-size:clamp(17px,3.4vw,20px);line-height:2.1;margin:0 0 6px;letter-spacing:.02em}
+  .grow-box .g-from{font-size:12.5px;color:var(--text-3);letter-spacing:.24em;text-align:right;margin:0}
+  .empty-box{border:1px dashed var(--border-strong);border-radius:16px;padding:32px 26px;text-align:center;
+    color:var(--text-2);background:var(--layer1)}
+  .empty-box a{font-weight:700}
+
+  /* 心跳点阵：每条心跳一个点（❤️💗💔 三色 · 💔 高亮） */
+  #dot-matrix{display:flex;flex-wrap:wrap;gap:5px;padding:18px;margin:14px 0 6px;
+    background:var(--layer1);border-radius:12px;border:1px solid var(--border)}
+  .hb-dot{width:9px;height:9px;border-radius:50%;cursor:default;transition:transform var(--dur-small) var(--ease-hover)}
+  .hb-dot.u{background:var(--success);opacity:.8}
+  .hb-dot.a{background:var(--warning);opacity:.8}
+  .hb-dot.c{background:var(--flag)}
+  .hb-dot:hover{transform:scale(2.1)}
+  .dot-legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--text-2);margin-bottom:26px}
+  .dot-legend .k{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+
+  /* 章节榜单（confused 聚类 TOP 榜） */
+  .rank-list{margin:10px 0 8px}
+  .rank-row{display:grid;grid-template-columns:minmax(9em,auto) 1fr 2.6em;gap:12px;align-items:center;
+    padding:9px 0;border-bottom:1px solid var(--border)}
+  .rank-row:last-child{border-bottom:none}
+  .rank-name{font-size:15px;color:var(--text)}
+  .rank-bars{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .rbar{height:7px;border-radius:4px;background:var(--layer2);overflow:hidden;position:relative}
+  .rbar>i{position:absolute;inset:0 auto 0 0;border-radius:4px;transition:width .9s var(--ease-enter)}
+  .rbar.c>i{background:var(--flag)}
+  .rbar.u>i{background:var(--success);opacity:.55}
+  .rank-n{font-size:14px;color:var(--flag);text-align:right;font-variant-numeric:tabular-nums}
+
+  /* 未命中问题榜 */
+  .q-list{list-style:none;margin:10px 0;padding:0}
+  .q-list li{padding:10px 0;border-bottom:1px solid var(--border);font-size:15.5px;line-height:26px}
+  .q-list li:last-child{border-bottom:none}
+  .q-list .q-t{float:right;font-size:12px;color:var(--text-2);padding-left:12px;line-height:26px}
+  .q-list .q-w{color:var(--accent-deep)}
+
+  /* 问题词云（简版） */
+  #word-cloud{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:center;
+    padding:26px 18px;background:var(--layer1);border-radius:12px;border:1px solid var(--border);min-height:90px}
+  .wc-w{color:var(--accent-deep);line-height:1.55;letter-spacing:.02em;cursor:default;transition:transform var(--dur-small) var(--ease-hover)}
+  .wc-w:hover{transform:scale(1.12)}
+  .wc-w b{font-weight:400;font-size:11px;color:var(--text-2);vertical-align:super}
+
+  /* ---------- 证据保鲜 ---------- */
+  table.fresh{width:100%;border-collapse:collapse;font-size:14.5px;line-height:22px;margin:14px 0 8px}
+  table.fresh th{text-align:left;font-size:12.5px;letter-spacing:.12em;color:var(--text-2);
+    background:var(--layer2);padding:9px 10px;border-bottom:1px solid var(--border-strong);white-space:nowrap}
+  table.fresh td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .fresh-badge{display:inline-block;min-width:4.4em;text-align:center;font-size:12px;letter-spacing:.1em;
+    border-radius:999px;padding:1px 9px;border:1px solid var(--border-strong);white-space:nowrap}
+  .fresh-badge.ok{color:var(--success-deep);border-color:var(--success)}
+  .fresh-badge.warn{color:var(--warning-deep);border-color:var(--warning)}
+  .fresh-badge.old{color:var(--flag);border-color:var(--flag)}
+  body.night .fresh-badge.ok{color:var(--success)}
+  body.night .fresh-badge.warn{color:var(--warning)}
+  body.night .fresh-badge.old{color:var(--flag)}
+  .fresh-note{font-size:12.5px;color:var(--text-2)}
+
+  /* ---------- 表单（提交新证据 · 与共同写作页同机制） ---------- */
+  .cf{border:1px solid var(--border-strong);border-radius:14px;background:var(--panel-bg);padding:22px 20px;margin:16px 0}
+  .cf label{display:block;font-size:13px;letter-spacing:.14em;color:var(--text-2);margin:14px 0 6px}
+  .cf label:first-child{margin-top:0}
+  .cf select,.cf input,.cf textarea{width:100%;font:inherit;font-size:15px;line-height:24px;color:var(--text);
+    background:var(--bg);border:1px solid var(--border-strong);border-radius:9px;padding:9px 12px}
+  .cf textarea{min-height:96px;resize:vertical}
+  .cf .cf-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .cf button{font:inherit;font-size:14.5px;min-height:var(--tap);padding:0 22px;cursor:pointer;
+    border-radius:999px;border:1px solid var(--border-strong);background:var(--btn-bg);color:var(--text);
+    transition:transform var(--dur-small) var(--ease-hover)}
+  .cf button:hover{transform:translateY(-1px)}
+  .cf button:active{transform:scale(.97)}
+  .cf button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .cf .cf-out{display:none;margin-top:14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+    line-height:19px;color:var(--text-2);background:var(--layer2);border-radius:9px;padding:12px 14px;
+    white-space:pre-wrap;word-break:break-all;max-height:180px;overflow:auto}
+  .cf .cf-out.show{display:block}
+
+  /* ---------- 感知输入（SENSORS 面板） ---------- */
+  .sensor-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:16px 0}
+  .sensor{border:1px solid var(--border);border-radius:13px;background:var(--panel-bg);padding:16px 18px}
+  .sensor .s-head{display:flex;align-items:center;gap:10px;font-size:15px}
+  .sensor .s-id{font-size:11.5px;color:var(--text-2);letter-spacing:.08em}
+  .sensor .s-note{font-size:13px;line-height:21px;color:var(--text-2);margin-top:8px}
+  .s-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .s-dot.active{background:var(--success);animation:breath 2.6s ease-in-out infinite}
+  .s-dot.planned{background:var(--disabled)}
+  .s-tag{margin-left:auto;font-size:11px;letter-spacing:.12em;color:var(--text-2);
+    border:1px solid var(--border-strong);border-radius:999px;padding:1px 9px}
+  .s-tag.on{color:var(--success-deep);border-color:var(--success)}
+  body.night .s-tag.on{color:var(--success)}
+  @keyframes breath{0%,100%{opacity:.45}50%{opacity:1}}
+
+  /* ---------- 数据流示意 ---------- */
+  .flow{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:22px;
+    background:var(--layer2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;
+    overflow-x:auto;white-space:pre;color:var(--text-2);margin:14px 0}
+  .flow b{color:var(--accent-deep);font-weight:700}
+
+  /* ---------- 页脚 ---------- */
+  footer.page{max-width:var(--measure);margin:56px auto 0;padding:36px 24px 120px;text-align:center;
+    font-size:13px;line-height:24px;color:var(--text-2);letter-spacing:.06em;
+    border-top:1px solid var(--border)}
+
+  /* ---------- 回顶钮（同族） ---------- */
+  #top-btn{position:fixed;right:18px;bottom:18px;z-index:60;width:var(--tap);height:var(--tap);
+    border-radius:50%;border:1px solid var(--border-strong);background:var(--panel-bg);color:var(--accent);
+    font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transform:translateY(8px);
+    transition:opacity var(--dur-medium),transform var(--dur-medium) var(--ease-enter)}
+  #top-btn.show{opacity:1;pointer-events:auto;transform:none}
+</style>
+</head>
+<body>
+
+<nav id="toc" aria-label="感知·地图">
+  <div class="bar">
+    <span class="brand">《生命之书·感知》</span>
+    <a href="#overview" class="active">感知总览</a>
+    <a href="#darkness">疑问显影</a>
+    <a href="#freshness">证据保鲜</a>
+    <a href="#sensors">感知输入</a>
+    <a href="./life-book-public-v5.0-wip.html">← 回到主书</a>
+    <a href="./contribute.html">共同写作</a>
+  </div>
+  <div class="tools">
+    <button id="night-btn" aria-label="让天黑下来" aria-pressed="false" title="让天黑下来">🌙</button>
+  </div>
+</nav>
+
+<header class="cover">
+  <!-- 神经末梢：页首触须 · 感知到的每个信号一次微光 -->
+  <svg id="nerve" viewBox="0 0 680 150" aria-hidden="true" focusable="false">
+    <g stroke="none">
+      <path class="tendril" style="animation-delay:-6.4s" d="M340,150 C332,112 306,84 258,60"></path>
+      <circle class="tip" cx="258" cy="60" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-5.1s" d="M340,150 C336,110 326,72 300,38"></path>
+      <circle class="tip" cx="300" cy="38" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-3.6s" d="M340,150 C340,106 340,62 336,22"></path>
+      <circle class="tip" cx="336" cy="22" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-2.2s" d="M340,150 C346,104 356,66 380,34"></path>
+      <circle class="tip" cx="380" cy="34" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-1.1s" d="M340,150 C348,112 376,84 424,58"></path>
+      <circle class="tip" cx="424" cy="58" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-4.4s" d="M340,150 C328,120 292,100 236,92"></path>
+      <circle class="tip" cx="236" cy="92" r="3.4"></circle>
+      <path class="tendril" style="animation-delay:-0.6s" d="M340,150 C352,120 388,100 444,92"></path>
+      <circle class="tip" cx="444" cy="92" r="3.4"></circle>
+    </g>
+  </svg>
+  <h1>感知</h1>
+  <div class="subtitle">—— 生命之书 · v5.0 感知书 · 神经末梢 ——</div>
+  <div class="rule"></div>
+  <p class="mission">v3.0，书开始回应你；v4.0，书开始被大家写。<br>这一次，书开始<strong>听</strong>——把你没看懂的地方、世界新长出的证据，都变成它下一步生长的方向。</p>
+  <div class="seal">XYZ 星际疗愈工程 · 2026<br>v5.0-wip · 感知层奠基 · 数据全在本设备</div>
+</header>
+
+<main>
+
+<!-- ================= 感知总览 ================= -->
+<section class="chapter" id="overview">
+  <div class="ch-no">感知总览</div>
+  <h2>这一页，是这本书的神经末梢</h2>
+  <p>一棵树不知道哪根枝该长，因为它感觉不到风。一本书不知道哪章该改，因为它听不见读者在哪里停住。这一页就是书的感受器：它聚合两类本地信号——你在各章末点过的"💔 看不懂"心跳，与你在伴读里问过、书还没能回答的问题——把它们显影成"我们此刻最不懂什么"。</p>
+  <div class="grow-box">
+    <p class="g-text">这些就是书下一步要长大的方向。</p>
+    <p class="g-from">—— v5.0 感知宣言 · 2026</p>
+  </div>
+  <div class="flow" aria-label="感知数据流（文字版）">
+<b>感知数据流</b>
+读端（本设备 localStorage，零联网）
+ ├─ 心跳键 <b>lb-heartbeats-v1</b>  [{ch, type: useful|act|confused, t}]   ← 主书各章末三颗心
+ └─ 未命中键 <b>lb3-unans</b>        [{q, t}]                              ← 伴读"还没讲到"的问题
+      ↓ 聚合
+ ├─ type=confused 按章节聚类 → 「读者最不懂 TOP 榜」
+ ├─ 全部心跳逐条显点 → 「心跳点阵」（💔 高亮）
+ ├─ 未命中问题全文 → 「未命中问题榜」+ 关键词频率 → 「问题词云」
+ └─ 聚合快照可导出 JSON（剪贴板）→ 交给 XYZ 端做跨设备显影
+      ↓ 输出
+ 写端（本设备剪贴板）
+ ├─ 「提交新证据」表单 → JSON → 剪贴板（与共同写作页同机制）
+ └─ 未来：SENSORS 加行接入文献 RSS / 期刊 alert / 心跳端点 → 书开始自己长大</div>
+  <p class="note">隐私：这一页不发出任何网络请求（可在离线状态打开验证）。所有数据只存在这台设备的浏览器里；导出与否，完全由你决定。</p>
+  <p class="sep">❖</p>
+</section>
+
+<!-- ================= 疑问显影 ================= -->
+<section class="chapter" id="darkness">
+  <div class="ch-no">疑问显影</div>
+  <h2>我们此刻最不懂什么</h2>
+  <p>下面每一颗 💔、每一个没被回答的问题，都是书的一个盲点在发光。聚合起来，就是全书最诚实的自我体检报告。</p>
+
+  <h3>心跳点阵</h3>
+  <p class="note">每一点是一次心跳：绿=有用 ❤️，黄=想做点什么 💗，红=看不懂 💔（红点即盲点信号）。悬停可见章节与时间。</p>
+  <div id="dot-matrix" aria-label="心跳点阵"></div>
+  <div class="dot-legend">
+    <span><span class="k" style="background:var(--success)"></span>有用 <b id="n-u">0</b></span>
+    <span><span class="k" style="background:var(--warning)"></span>想做 <b id="n-a">0</b></span>
+    <span><span class="k" style="background:var(--flag)"></span>看不懂 <b id="n-c">0</b></span>
+    <span>共 <b id="n-all">0</b> 条 · 最近 <b id="n-last">—</b></span>
+  </div>
+
+  <h3>读者最不懂的章节 · TOP 榜</h3>
+  <p class="note">按"看不懂 💔"心跳数聚类。红条=看不懂，绿条=同章"有用"参照——红高于绿越多的章，越该优先重写。</p>
+  <div id="rank-box" class="rank-list" aria-live="polite"></div>
+
+  <h3>未命中问题榜</h3>
+  <p class="note">你在伴读里问过、书诚实地回答"还没讲到"的问题（高亮词=聚合后的高频关键词）。它们是下一版问答库与章节扩写的第一候选。</p>
+  <div id="q-box"></div>
+
+  <h3>问题词云 · 简版</h3>
+  <div id="word-cloud" aria-label="未命中问题关键词频率"></div>
+  <p class="note" style="text-align:center;margin-top:10px">字号=被问到的频率。词越大，书在那里越瞎。</p>
+
+  <div class="cf" style="margin-top:26px">
+    <div class="cf-btns">
+      <button type="button" id="snap-copy">复制感知快照 JSON</button>
+      <button type="button" id="snap-demo">⚡ 演示一次微光</button>
+    </div>
+    <p class="note" style="margin:14px 0 0">快照=本页全部聚合结果（TOP 榜+词频+未命中问题原文）。多台设备各复制一份交给编者，即可跨设备拼出完整的"我们最不懂什么"。</p>
+  </div>
+  <p class="sep">❖</p>
+</section>
+
+<!-- ================= 证据保鲜 ================= -->
+<section class="chapter" id="freshness">
+  <div class="ch-no">证据保鲜</div>
+  <h2>每章的证据，什么时候会过期</h2>
+  <p>书里的每一章都站在证据上，而证据会老。这一节是"保鲜扫描表"v0：先手工维护最容易过时的章节，随天数自动从"新鲜"走到"该核验"。红黄灯亮起的那天，就是这章需要重查文献的日子。</p>
+  <table class="fresh">
+    <thead>
+      <tr><th>章节</th><th>上次核验</th><th>保鲜状态</th><th>为什么它会过期</th></tr>
+    </thead>
+    <tbody id="fresh-body"></tbody>
+  </table>
+  <p class="fresh-note">保鲜期按证据半衰期估：健康指南/AI≈180 天，气候≈365 天，基础解剖/物理宇宙≈730 天。表为 v0 手工维护，未来由文献传感器自动更新"上次核验"列。</p>
+
+  <h3>提交新证据</h3>
+  <p class="note">读到了新研究、发现书中数据过期、或找到了反例？填下面的表单生成 JSON 并复制（与《共同写作》页同一机制），交给编者即可入册。<strong>反例尤其欢迎——被证伪并改正，是书变可靠的方式。</strong></p>
+  <div class="cf">
+    <label for="ev-type">证据类型</label>
+    <select id="ev-type">
+      <option value="new-research">新研究（书该收录的新证据）</option>
+      <option value="update">数据更新（书里的数字旧了）</option>
+      <option value="stale">过期提醒（某章证据已过保鲜期）</option>
+      <option value="counterexample">反例（书里某说法被证伪）</option>
+    </select>
+    <label for="ev-chapter">相关章节</label>
+    <select id="ev-chapter"></select>
+    <label for="ev-source">来源（期刊/DOI/链接，可选但强烈建议）</label>
+    <input id="ev-source" type="text" placeholder="如：NEJM 2026;394:xxx-xxx 或 https://…">
+    <label for="ev-body">内容（发现了什么、对应书中哪一处）</label>
+    <textarea id="ev-body" placeholder="例：第六章"从头到脚"提到成人每日需水量公式，新指南已改为……"></textarea>
+    <label for="ev-credit">署名（可匿名，默认"一位读者"）</label>
+    <input id="ev-credit" type="text" placeholder="一位读者">
+    <div class="cf-btns">
+      <button type="button" id="ev-gen">生成证据 JSON</button>
+      <button type="button" id="ev-copy" disabled>复制到剪贴板</button>
+    </div>
+    <pre class="cf-out" id="ev-out"></pre>
+  </div>
+  <p class="sep">❖</p>
+</section>
+
+<!-- ================= 感知输入 ================= -->
+<section class="chapter" id="sensors">
+  <div class="ch-no">感知输入</div>
+  <h2>当书连上世界的数据流，它将开始自己长大</h2>
+  <p>现在这一页只听本设备的心跳与疑问（下方第一个传感器，已激活）。文献与期刊的传感器已经在接口里预留好位置——未来每加一行、接上一个数据流，书就能自己发现"世界又长出了新证据"。</p>
+  <div class="sensor-list" id="sensor-list"></div>
+  <p class="note">SENSORS 是这一页的感知输入接口：每行一个传感器（id / 类型 / 状态）。状态为 active 的会实时参与本页显影；planned 的等一个数据流地址——接线那天，书的神经末梢就伸到了全人类的文献海里。</p>
+  <blockquote>
+    <p>公网聚合端点暂缓（owner 裁决），先做本地感知与导入机制：每一台设备各自显影，由人把快照带回编者处聚合。慢，但每一步都诚实。</p>
+  </blockquote>
+  <p class="sep">❖</p>
+</section>
+
+</main>
+
+<footer class="page">
+  《生命之书·感知》· 书的神经末梢<br>
+  XYZ 星际疗愈工程 · 2026 · v5.0-wip 感知层<br>
+  健康科普 · 不替代医疗诊断 · 红旗症状请就医<br>
+  <a href="./life-book-public-v5.0-wip.html">← 回到主书</a> ·
+  <a href="./contribute.html">✍ 共同写作</a> ·
+  <a href="./versions.html">版本树</a>
+</footer>
+
+<button id="top-btn" aria-label="回到本页开头" title="回到本页开头">↑</button>
+
+<script>
+/* ============================================================
+   《生命之书·感知》v5.0-wip · 感知层奠基（零后端 · 零联网 · 数据全在本设备）
+   读取：lb-heartbeats-v1（主书三颗心）+ lb3-unans（伴读未命中问题）
+   输出：疑问显影（TOP 榜/点阵/词云）+ 证据保鲜表 + 证据 JSON（剪贴板，同共同写作页机制）
+   预留：SENSORS 感知输入接口（文献 RSS/期刊 alert/心跳端点=未来加行激活）
+   纪律：隐私零外传；无 fetch；无外部资源；触须微光=感知反馈
+   ============================================================ */
+(function(){
+'use strict';
+
+var BOOK_VER = '5.0-wip';
+
+/* ---------- 章节锚点表（与主书 v4.0-wip CH 表同源复制） ---------- */
+var CH = {
+  'xu':'序章·会走的城市','ch1':'第一章·星星搭的城','ch2':'第二章·头','ch2-5':'第2.5章·五官',
+  'ch3':'第三章·胸','ch4':'第四章·腹','ch5':'第五章·五脏六腑（中医地图）','ch6':'第六章·从头到脚',
+  'ch7':'第七章·左与右','ch8':'第八章·前与后','ch9':'第九章·洋葱剖面','ch9-5':'第9.5章·微解剖',
+  'ch10':'第十章·三张网','ch11':'第十一章·生命是什么','ch12':'第十二章·你与宇宙',
+  'vol2':'卷二·人与人','vol3':'卷三·万物有灵','vol4':'卷四·地球','vol5':'卷五·星空',
+  'vol6':'卷六·数字时代','vol7':'卷七·时间之河','final':'终章·五件事','v2':'增补·全人类的医生',
+  'v21':'修订·六个动词','wisdom':'附·智慧边界','gaps':'附·缺口账本','unity':'终部·合一','bookend':'书末·诚实边界'
+};
+function chName(id){ return CH[id] || ('（站外章节 · ' + id + '）'); }
+
+/* ---------- 感知输入接口（预留）：加行+接数据流即激活 ---------- */
+var SENSORS = [
+  { id:'local-heartbeat', type:'本地心跳与未命中', status:'active',
+    note:'读 lb-heartbeats-v1 与 lb3-unans（主书三颗心+伴读未答问题）——本页正在用它显影。' },
+  { id:'lit-rss', type:'文献 RSS', status:'planned',
+    note:'PubMed / arXiv / CrossRef 关键词订阅 → 新证据候选自动入册（待接线地址）。' },
+  { id:'journal-alert', type:'期刊 alert', status:'planned',
+    note:'NEJM / Lancet / Nature 目录页巡检 → 高相关研究提醒各章编者（待接线地址）。' },
+  { id:'hb-endpoint', type:'心跳聚合端点', status:'planned',
+    note:'主书 HB_ENDPOINT 接线后，全网读者的"最不懂什么"在此聚合（公网端点按 owner 裁决暂缓）。' }
+];
+
+/* ---------- 本地读取（零联网 · 读失败=空） ---------- */
+function lsJSON(key, d){
+  try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : d; }catch(e){ return d; }
+}
+function loadHeartbeats(){
+  var a = lsJSON('lb-heartbeats-v1', []);
+  return Array.isArray(a) ? a : [];
+}
+function loadUnanswered(){
+  var a = lsJSON('lb3-unans', []);
+  return Array.isArray(a) ? a : [];
+}
+
+/* ---------- 神经末梢微光：感知到的每个信号一次微光 ---------- */
+var tips = [].slice.call(document.querySelectorAll('#nerve .tip'));
+var tipIdx = 0;
+function nervePulse(){
+  if(!tips.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var el = tips[(tipIdx++) % tips.length];
+  el.classList.remove('glow','halo'); void el.getBoundingClientRect();
+  el.classList.add('glow','halo');
+  setTimeout(function(){ el.classList.remove('glow','halo'); }, 900);
+}
+function nerveBurst(n){
+  n = Math.min(n || 1, 10);
+  for(var i = 0; i < n; i++){ setTimeout(nervePulse, i * 140); }
+}
+
+/* ---------- 工具 ---------- */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function fmtTime(t){
+  var d = new Date(t);
+  if(isNaN(d.getTime())) return '';
+  function p(n){ return (n < 10 ? '0' : '') + n; }
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function fmtAgo(t){
+  var d = new Date(t);
+  if(isNaN(d.getTime())) return '';
+  var ms = Date.now() - d.getTime();
+  if(ms < 0) ms = 0;
+  var day = Math.floor(ms / 86400000);
+  if(day <= 0) return '今天';
+  if(day === 1) return '昨天';
+  if(day < 30) return day + ' 天前';
+  if(day < 365) return Math.floor(day / 30) + ' 个月前';
+  return Math.floor(day / 365) + ' 年前';
+}
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.setAttribute('readonly','');
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+function copyText(text, btn, doneLabel){
+  function done(){
+    var old = btn.textContent;
+    btn.textContent = doneLabel || '已复制到剪贴板 ✓';
+    setTimeout(function(){ btn.textContent = old; }, 2200);
+    nerveBurst(3);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, function(){ fallbackCopy(text); done(); });
+  }else{ fallbackCopy(text); done(); }
+}
+
+/* ---------- 疑问显影 ①：心跳点阵 + 计数 ---------- */
+var TYPE_CLS = { useful:'u', act:'a', confused:'c' };
+var hbAll = loadHeartbeats();
+var unAll = loadUnanswered();
+
+function renderMatrix(){
+  var box = document.getElementById('dot-matrix');
+  if(!box) return;
+  box.innerHTML = '';
+  var frag = document.createDocumentFragment();
+  var last = '';
+  hbAll.forEach(function(h, i){
+    if(!h || !h.ch || !h.type) return;
+    var d = document.createElement('span');
+    d.className = 'hb-dot ' + (TYPE_CLS[h.type] || 'u');
+    d.title = chName(h.ch) + ' · ' + ({useful:'有用',act:'想做点什么',confused:'看不懂'}[h.type] || h.type) + (h.t ? (' · ' + fmtTime(h.t)) : '');
+    frag.appendChild(d);
+    if(i % 40 === 39){ setTimeout(nervePulse, i); }
+    if(h.t){ var s = fmtTime(h.t); if(s >= last) last = s; }
+  });
+  box.appendChild(frag);
+  var cnt = { useful:0, act:0, confused:0 };
+  hbAll.forEach(function(h){ if(h && h.type in cnt) cnt[h.type]++; });
+  document.getElementById('n-u').textContent = cnt.useful;
+  document.getElementById('n-a').textContent = cnt.act;
+  document.getElementById('n-c').textContent = cnt.confused;
+  document.getElementById('n-all').textContent = hbAll.length;
+  document.getElementById('n-last').textContent = last || '—';
+}
+
+/* ---------- 疑问显影 ②：读者最不懂的章节 TOP 榜 ---------- */
+function renderRank(){
+  var box = document.getElementById('rank-box');
+  if(!box) return;
+  var agg = {};
+  hbAll.forEach(function(h){
+    if(!h || !h.ch) return;
+    if(!agg[h.ch]) agg[h.ch] = { c:0, u:0 };
+    if(h.type === 'confused') agg[h.ch].c++;
+    else if(h.type === 'useful') agg[h.ch].u++;
+  });
+  var rows = Object.keys(agg).map(function(id){ return { id:id, c:agg[id].c, u:agg[id].u }; })
+    .filter(function(r){ return r.c > 0; })
+    .sort(function(a, b){ return b.c - a.c || (b.u - a.u); });
+  var noData = rows.length === 0;
+  if(noData){
+    box.innerHTML = '<div class="empty-box">还没有人在这台设备上点过"💔 看不懂"。<br><a href="./life-book-public-v5.0-wip.html">去主书任意一章的章末</a>，点下那颗心——书就开始听了。</div>';
+    return;
+  }
+  var max = Math.max(rows[0].c, 1);
+  var html = '';
+  rows.forEach(function(r, i){
+    html += '<div class="rank-row">'
+      + '<span class="rank-name">' + (i + 1) + '. <a href="./life-book-public-v5.0-wip.html#' + esc(r.id) + '">' + esc(chName(r.id)) + '</a></span>'
+      + '<span class="rank-bars">'
+      +   '<span class="rbar c"><i style="width:' + Math.round(r.c / max * 100) + '%"></i></span>'
+      +   (r.u > 0 ? '<span class="rbar u"><i style="width:' + Math.round(r.u / max * 100) + '%"></i></span>' : '')
+      + '</span>'
+      + '<span class="rank-n">' + r.c + '</span>'
+      + '</div>';
+    setTimeout(nervePulse, 300 + i * 160);
+  });
+  box.innerHTML = html;
+}
+
+/* ---------- 疑问显影 ③：未命中问题榜 + 词云 ---------- */
+var STOP = {
+  '什么':1,'怎么':1,'为什么':1,'是不是':1,'如果':1,'的话':1,'这个':1,'那个':1,'就是':1,'还是':1,
+  '可以':1,'应该':1,'现在':1,'请问':1,'一下':1,'一个':1,'没有':1,'我的':1,'有的':1,'如何':1,
+  '哪些':1,'会不会':1,'或者':1,'以及':1,'但是':1,'然后':1,'自己':1,'的时候':1,'有什么':1,
+  '怎么办':1,'样才':1,'算是':1,'对于':1,'关于':1,'最近':1,'总是':1,'老是':1,'到底':1,'究':1
+};
+function extractTerms(qs){
+  var freq = {}, i, j, q, m, w;
+  var RE_EN = /[a-zA-Z][a-zA-Z-]+/g;
+  for(i = 0; i < qs.length; i++){
+    q = String(qs[i] || '').toLowerCase();
+    m = q.match(RE_EN);
+    if(m){ for(j = 0; j < m.length; j++){ w = m[j]; if(!STOP[w]) freq[w] = (freq[w] || 0) + 1; } }
+    for(j = 0; j + 2 <= q.length; j++){
+      w = q.substr(j, 2);
+      if(/[a-z0-9\s.,!?;:'"()\[\]{}]/.test(w.charAt(0))) continue;
+      if(/[a-z0-9\s.,!?;:'"()\[\]{}]/.test(w.charAt(1))) continue;
+      if(!STOP[w]) freq[w] = (freq[w] || 0) + 1;
+    }
+  }
+  return Object.keys(freq).map(function(k){ return { w:k, n:freq[k] }; })
+    .sort(function(a, b){ return b.n - a.n; });
+}
+function renderQuestions(){
+  var qBox = document.getElementById('q-box');
+  var cloud = document.getElementById('word-cloud');
+  if(!qBox) return;
+  if(!unAll.length){
+    qBox.innerHTML = '<div class="empty-box">伴读还没有遇到答不上的问题。<br><a href="./life-book-public-v5.0-wip.html">回到主书右上角"伴读"</a>，尽管问——答不上时它会诚实说"还没讲到"，并把问题记在这里。</div>';
+    if(cloud){ cloud.innerHTML = '<span class="note" style="letter-spacing:.06em">（词云等待第一个未命中问题）</span>'; }
+    return;
+  }
+  var sorted = unAll.slice().sort(function(a, b){ return (b.t || 0) - (a.t || 0); });
+  var terms = extractTerms(unAll.map(function(x){ return x.q; }));
+  var topSet = {};
+  terms.slice(0, 18).forEach(function(t){ topSet[t.w] = 1; });
+  var html = '<ul class="q-list">';
+  sorted.slice(0, 20).forEach(function(x, i){
+    var q = esc(String(x.q || '')).trim();
+    var hi = q.replace(new RegExp('(' + Object.keys(topSet).map(function(w){ return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')', 'g'), '<span class="q-w">$1</span>');
+    html += '<li><span class="q-t">' + esc(fmtAgo(x.t)) + '</span>' + hi + '</li>';
+    setTimeout(nervePulse, 200 + i * 120);
+  });
+  html += '</ul>';
+  if(sorted.length > 20) html += '<p class="note">…共 ' + sorted.length + ' 条（榜示最近 20 条，快照 JSON 含全部）。</p>';
+  qBox.innerHTML = html;
+  if(cloud){
+    if(!terms.length){
+      cloud.innerHTML = '<span class="note">（暂无可聚合的关键词）</span>';
+    }else{
+      var maxN = terms[0].n, minN = terms[terms.length - 1].n;
+      var html2 = '';
+      terms.slice(0, 24).forEach(function(t, i){
+        var scale = maxN > minN ? (t.n - minN) / (maxN - minN) : 1;
+        var size = Math.round(13 + scale * 17);
+        html2 += '<span class="wc-w" style="font-size:' + size + 'px" title="被问 ' + t.n + ' 次">' + esc(t.w) + '</span>';
+        setTimeout(nervePulse, 400 + i * 90);
+      });
+      cloud.innerHTML = html2;
+    }
+  }
+}
+
+/* ---------- 感知快照导出（剪贴板 · 与共同写作页同机制） ---------- */
+function buildSnapshot(){
+  var hb = loadHeartbeats(), un = loadUnanswered();
+  var agg = {};
+  hb.forEach(function(h){
+    if(h && h.ch && h.type === 'confused') agg[h.ch] = (agg[h.ch] || 0) + 1;
+  });
+  var confused = Object.keys(agg).map(function(id){ return { ch:id, title:chName(id), n:agg[id] }; })
+    .sort(function(a, b){ return b.n - a.n; });
+  return JSON.stringify({
+    kind:'life-book-sense-snapshot',
+    book:'life-book-public', version:BOOK_VER,
+    generated:new Date().toISOString(),
+    heartbeat_total:hb.length,
+    confused_by_chapter:confused,
+    unanswered_total:un.length,
+    top_missed_terms:extractTerms(un.map(function(x){ return x.q; })).slice(0, 30),
+    unanswered:un.slice().sort(function(a, b){ return (b.t || 0) - (a.t || 0); })
+  }, null, 2);
+}
+var snapCopy = document.getElementById('snap-copy');
+if(snapCopy){
+  snapCopy.addEventListener('click', function(){
+    copyText(buildSnapshot(), snapCopy, '感知快照已复制 ✓');
+  });
+}
+var snapDemo = document.getElementById('snap-demo');
+if(snapDemo){
+  snapDemo.addEventListener('click', function(){ nerveBurst(7); });
+}
+
+/* ---------- 证据保鲜表 v0（手工维护 · 最易过时三章置顶） ---------- */
+/* decay=保鲜期（天）；verified=上次核验；rank 越小越易过时（置顶） */
+var EVIDENCE = [
+  { ch:'v21',  verified:'2026-08-20', decay:180, rank:1,
+    why:'健康律站在指南级证据上——筛查阈值/血压血糖标准/疫苗程序逐年修订，是全书更新最快的一章。' },
+  { ch:'vol6', verified:'2026-08-20', decay:180, rank:2,
+    why:'AI 章的能力与安全证据月度级演进；写下的每个"AI 现在能做什么"都在变旧。' },
+  { ch:'vol4', verified:'2026-08-20', decay:365, rank:3,
+    why:'气候归因与临界点报告年年加急——升温线、海平面、极端天气频率都在动。' },
+  { ch:'final',verified:'2026-08-20', decay:180, rank:4,
+    why:'终章五件事与健康律同源（睡动吃连晒），预防证据随指南滚动。' },
+  { ch:'wisdom',verified:'2026-08-20', decay:180, rank:5,
+    why:'智慧边界附录收录 2009-2024 前沿（F01-F23）——前沿者，最易被新前沿越过。' },
+  { ch:'v2',  verified:'2026-08-20', decay:365, rank:6,
+    why:'152 医系增补的循证层级与整合医学证据以年为单位演进。' },
+  { ch:'ch10',verified:'2026-08-20', decay:365, rank:7,
+    why:'三张网（神经/免疫/内分泌）的机制图景以年为单位补完。' },
+  { ch:'vol7',verified:'2026-08-20', decay:730, rank:8,
+    why:'死亡教育与生命历程证据半衰期较长，但临终关怀实践在持续更新。' },
+  { ch:'vol5',verified:'2026-08-20', decay:730, rank:9,
+    why:'星空卷站在天文 FACT 上——最稳，但韦布望远镜仍在改写早期宇宙细节。' },
+  { ch:'ch9-5',verified:'2026-08-20', decay:730, rank:10,
+    why:'微解剖站在解剖学 FACT 上——全书最稳的一层。' }
+];
+function renderFresh(){
+  var body = document.getElementById('fresh-body');
+  if(!body) return;
+  EVIDENCE.sort(function(a, b){ return a.rank - b.rank; });
+  var html = '';
+  EVIDENCE.forEach(function(e){
+    var days = Math.max(0, Math.floor((Date.now() - new Date(e.verified + 'T00:00:00+08:00').getTime()) / 86400000));
+    var ratio = days / e.decay;
+    var cls = ratio >= 1 ? 'old' : (ratio >= .6 ? 'warn' : 'ok');
+    var label = ratio >= 1 ? '该核验' : (ratio >= .6 ? '渐旧' : '新鲜');
+    html += '<tr>'
+      + '<td><a href="./life-book-public-v5.0-wip.html#' + esc(e.ch) + '">' + esc(chName(e.ch)) + '</a></td>'
+      + '<td>' + esc(e.verified) + '<span class="fresh-note">（' + days + ' 天前）</span></td>'
+      + '<td><span class="fresh-badge ' + cls + '">' + label + '</span></td>'
+      + '<td class="fresh-note">' + esc(e.why) + '</td>'
+      + '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+/* ---------- 提交新证据（表单 → JSON → 剪贴板 · 同共同写作页机制） ---------- */
+var evSel = document.getElementById('ev-chapter');
+if(evSel){
+  var optAll = document.createElement('option');
+  optAll.value = ''; optAll.textContent = '全书 / 其他 / 本感知页';
+  evSel.appendChild(optAll);
+  Object.keys(CH).forEach(function(id){
+    var o = document.createElement('option');
+    o.value = id; o.textContent = chName(id);
+    evSel.appendChild(o);
+  });
+}
+function evPayload(){
+  var sel = document.getElementById('ev-chapter');
+  var title = sel.value ? (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : '') : '全书/其他';
+  return JSON.stringify({
+    kind:'life-book-evidence',
+    book:'life-book-public', version:BOOK_VER,
+    channel:'evidence-submit',
+    type:document.getElementById('ev-type').value,
+    chapter:sel.value, chapter_title:title,
+    source:document.getElementById('ev-source').value.trim(),
+    body:document.getElementById('ev-body').value.trim(),
+    credit:document.getElementById('ev-credit').value.trim() || '一位读者',
+    generated:new Date().toISOString()
+  }, null, 2);
+}
+var evGen = document.getElementById('ev-gen'),
+    evCopy = document.getElementById('ev-copy'),
+    evOut = document.getElementById('ev-out');
+if(evGen && evCopy && evOut){
+  evGen.addEventListener('click', function(){
+    var body = document.getElementById('ev-body');
+    if(!body.value.trim()){
+      evOut.textContent = '⚠ 请先写内容——哪怕一句"第 X 章的某个数字旧了"也是合格的证据贡献。';
+      evOut.classList.add('show');
+      body.focus();
+      return;
+    }
+    var payload = evPayload();
+    evOut.textContent = payload;
+    evOut.classList.add('show');
+    evCopy.disabled = false;
+    evGen.textContent = '已生成 ✓（可修改后重新生成）';
+    nerveBurst(2);
+    setTimeout(function(){ evGen.textContent = '生成证据 JSON'; }, 2400);
+  });
+  evCopy.addEventListener('click', function(){
+    copyText(evPayload(), evCopy, '已复制到剪贴板 ✓');
+  });
+}
+
+/* ---------- SENSORS 面板渲染 ---------- */
+function renderSensors(){
+  var box = document.getElementById('sensor-list');
+  if(!box) return;
+  var html = '';
+  SENSORS.forEach(function(s, i){
+    var on = s.status === 'active';
+    html += '<div class="sensor">'
+      + '<div class="s-head">'
+      +   '<span class="s-dot ' + (on ? 'active' : 'planned') + '"></span>'
+      +   '<span>' + esc(s.type) + '</span>'
+      +   '<span class="s-tag' + (on ? ' on' : '') + '">' + esc(s.id) + ' · ' + (on ? '已激活' : '预留') + '</span>'
+      + '</div>'
+      + '<div class="s-note">' + esc(s.note) + '</div>'
+      + '</div>';
+    if(on) setTimeout(nervePulse, 150 + i * 200);
+  });
+  box.innerHTML = html;
+}
+
+/* ---------- 夜读模式（读 lb-theme · 兼容主书 lb-night） ---------- */
+var nightBtn = document.getElementById('night-btn');
+function applyNight(on){
+  document.body.classList.toggle('night', on);
+  if(nightBtn){
+    nightBtn.textContent = on ? '☀️' : '🌙';
+    nightBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    nightBtn.title = on ? '让天亮回来' : '让天黑下来';
+  }
+}
+var savedTheme = null;
+try{ savedTheme = localStorage.getItem('lb-theme') || localStorage.getItem('lb-night'); }catch(e){}
+applyNight(savedTheme === 'night' || savedTheme === '1');
+if(nightBtn){
+  nightBtn.addEventListener('click', function(){
+    var on = !document.body.classList.contains('night');
+    applyNight(on);
+    try{ localStorage.setItem('lb-theme', on ? 'night' : 'light'); }catch(e){}
+    nervePulse();
+  });
+}
+
+/* ---------- 目录 active 跟随 + 回顶钮 ---------- */
+var links = [].slice.call(document.querySelectorAll('#toc a[href^="#"]'));
+var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+if('IntersectionObserver' in window && targets.length){
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+      }
+    });
+  }, { rootMargin:'-30% 0px -60% 0px' });
+  targets.forEach(function(t){ if(t) io.observe(t); });
+}
+var topBtn = document.getElementById('top-btn');
+if(topBtn){
+  window.addEventListener('scroll', function(){
+    topBtn.classList.toggle('show', window.scrollY > 600);
+  }, { passive:true });
+  topBtn.addEventListener('click', function(){
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+}
+
+/* ---------- 启动：感知一轮（读到多少信号=亮多少微光） ---------- */
+renderMatrix();
+renderRank();
+renderQuestions();
+renderFresh();
+renderSensors();
+var sensed = hbAll.length + unAll.length;
+if(sensed > 0){ nerveBurst(Math.min(Math.ceil(Math.log2(sensed + 1)) + 2, 10)); }
+})();
+</script>
+</body>
+</html>

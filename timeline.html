@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="description" content="《生命之书·双时间线卷轴》——宇宙的一生与一个人的一生同屏滑动：上轨 138 亿年（对数尺可切线性），下轨从相遇之前到四种不朽。年龄选择器、日夜双主题、节点朗读。零联网、零收集。">
+<title>生命之书 · 双时间线卷轴</title>
+<style>
+  /* ==========================================================
+     《生命之书·双时间线卷轴》v1（2026-08-20）
+     上轨 = 宇宙的一生（分段对数尺·可切线性）· 下轨 = 一个人的一生（线性尺）
+     沿用主书 v2.0 双主题 token（白昼之书 / 星空之书）+ 童画版几何插画语法
+     零外部依赖 · 零联网 · 零收集 · reduced-motion 尊重
+     ========================================================== */
+  :root{
+    /* 白昼之书（日间主题）——沿用主书 31 token 摘要 */
+    --bg:#FAF6EF; --layer1:#F3ECDF; --layer2:#EBE1CF; --layer3:#E2D5BD;
+    --ink:#2A2622; --ink2:#6B6154; --ink3:#4A443C;
+    --accent:#B3452C; --accent-deep:#9A3A24;
+    --gold:#9A6B1F; --flag:#A03028; --link:#8C4510;
+    --ok:#3E7A52; --selbg:#F5E7CE;
+    --border:#D9CDB9; --border-strong:#99855F;
+    --panel:rgba(250,246,239,.97);
+    /* 双轨语义色 */
+    --u-c1:#4A3F7A; --u-c2:#8D82C9;        /* 上轨·星空紫 */
+    --h-c1:#B3452C; --h-c2:#D98868;        /* 下轨·朱砂 */
+    --rail-u:linear-gradient(90deg,#8D82C9,#4A3F7A 55%,#8D82C9);
+    --rail-h:linear-gradient(90deg,#D98868,#B3452C 55%,#D98868);
+    --xyz-grad:linear-gradient(90deg,rgba(218,169,78,0),rgba(218,169,78,.5) 30%,rgba(140,80,180,.45) 70%,rgba(140,80,180,0));
+    --beam-glow:rgba(218,169,78,.55);
+    --shadow:0 4px 0 rgba(140,58,38,.12);
+  }
+  body.night{
+    /* 星空之书（夜间主题） */
+    --bg:#0B1220; --layer1:#111A2B; --layer2:#182338; --layer3:#1F2D47;
+    --ink:#E8E4D8; --ink2:#9FA093; --ink3:#E8E4D8;
+    --accent:#D4A94E; --accent-deep:#B8933F;
+    --gold:#D4A94E; --flag:#E07B5A; --link:#9EC1E8;
+    --ok:#8CC29A; --selbg:#24354F;
+    --border:#2B3A54; --border-strong:#55698F;
+    --panel:rgba(11,18,32,.94);
+    --u-c1:#8D82C9; --u-c2:#B7AEe2;
+    --h-c1:#E07B5A; --h-c2:#E8A08C;
+    --rail-u:linear-gradient(90deg,#556aB0,#8D82C9 55%,#556AB0);
+    --rail-h:linear-gradient(90deg,#B0603F,#E07B5A 55%,#B0603F);
+    --xyz-grad:linear-gradient(90deg,rgba(212,169,78,0),rgba(212,169,78,.34) 30%,rgba(141,130,201,.34) 70%,rgba(141,130,201,0));
+    --beam-glow:rgba(212,169,78,.6);
+    --shadow:0 4px 0 rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--selbg)}
+  button{font-family:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--border-strong);outline-offset:2px;border-radius:8px}
+
+  /* ---------- 顶栏 HUD ---------- */
+  #hud{
+    position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:8px;
+    padding:8px 12px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-bottom:2px solid var(--border);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+  }
+  #hud::-webkit-scrollbar{display:none}
+  #hud .brand{font-weight:800;font-size:16px;color:var(--accent);white-space:nowrap}
+  #hud .brand small{color:var(--ink2);font-weight:600;margin-left:6px;font-size:12px}
+  #hud .sp{flex:1 0 4px}
+  .hbtn{
+    flex:0 0 auto;min-height:40px;padding:0 14px;border-radius:999px;border:2px solid var(--border-strong);
+    background:var(--layer1);color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap;
+  }
+  .hbtn:hover{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+  .hbtn:active{transform:translateY(1px)}
+  .hbtn.round{width:40px;padding:0;font-size:17px}
+  .hbtn.pulse{background:var(--accent);color:#FFF6E9;border-color:var(--accent-deep)}
+
+  /* ---------- 舞台（滑动区） ---------- */
+  #stage{
+    position:fixed;inset:0;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+    outline:none;overscroll-behavior:contain;
+  }
+  #stage.grabbing{cursor:grabbing}
+  #canvas{position:absolute;top:0;bottom:0;left:0;width:15000px;will-change:transform}
+  #canvas.anim .node,#canvas.anim .tick,#canvas.anim .zone{transition:left .65s cubic-bezier(.16,1,.3,1)}
+
+  /* 轨道线 */
+  .rail{position:absolute;left:0;width:100%;height:5px;border-radius:3px;opacity:.9}
+  #rail-u{top:16%;background:var(--rail-u)}
+  #rail-h{top:84%;background:var(--rail-h)}
+  body.short #rail-u{top:13%} body.short #rail-h{top:87%}
+  #spine{
+    position:absolute;left:0;width:100%;top:50%;height:0;border-top:2px dotted var(--border);opacity:.55;
+  }
+  /* 尺度刻度 */
+  .tick{position:absolute;font-size:10.5px;color:var(--ink2);white-space:nowrap;transform:translateX(-50%)}
+  .tick i{display:block;margin:0 auto 2px;width:1.5px;height:8px;background:var(--ink2);opacity:.6}
+  .tick.tu{top:calc(16% + 10px)} .tick.th{top:calc(84% - 30px)}
+  body.short .tick.tu{top:calc(13% + 10px)} body.short .tick.th{top:calc(87% - 30px)}
+
+  /* 轨道名牌（固定不随卷轴动） */
+  .lane-chip{
+    position:fixed;left:10px;z-index:30;font-size:12.5px;font-weight:700;letter-spacing:.05em;
+    color:var(--ink2);background:var(--panel);border:1.5px solid var(--border);border-radius:999px;
+    padding:3px 12px;pointer-events:none;
+  }
+  #chip-u{top:calc(60px + 3.5vh)}
+  #chip-h{bottom:calc(64px + 3.5vh)}
+  #chip-u b{color:var(--u-c1)} #chip-h b{color:var(--h-c1)}
+
+  /* 当前节点 HUD 读数 */
+  #nowbar{
+    position:fixed;right:10px;z-index:30;display:flex;flex-direction:column;gap:3px;align-items:flex-end;
+    font-size:12.5px;color:var(--ink2);background:var(--panel);border:1.5px solid var(--border);
+    border-radius:12px;padding:6px 12px;pointer-events:none;max-width:56vw;
+  }
+  #nowbar b{font-weight:700}
+  #now-u b{color:var(--u-c1)} #now-h b{color:var(--h-c1)}
+
+  /* ---------- 节点 ---------- */
+  .node{position:absolute;width:0;height:0}
+  .node.u{top:16%} .node.h{top:84%}
+  body.short .node.u{top:13%} body.short .node.h{top:87%}
+  .mk{
+    position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;
+    background:var(--layer1);border:3.5px solid var(--u-c1);z-index:5;transition:transform .15s;
+  }
+  .node.h .mk{border-color:var(--h-c1)}
+  .node:hover .mk{transform:scale(1.25)}
+  .node.candidate .mk{border-style:dashed;opacity:.85}
+  .node.model .mk{border-style:double}
+  .node .mk::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--u-c1)}
+  .node.h .mk::after{background:var(--h-c1)}
+  .node.candidate .mk::after,.node.model .mk::after{background:transparent}
+  /* 你在这（脉冲环） */
+  .node.you .mk{border-color:var(--gold);box-shadow:0 0 0 0 var(--beam-glow);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--beam-glow)}70%{box-shadow:0 0 0 14px rgba(218,169,78,0)}100%{box-shadow:0 0 0 0 rgba(218,169,78,0)}}
+  .node.xyz .mk{border-radius:5px;transform:rotate(45deg)}
+  .node.xyz .mk::after{border-radius:2px}
+  .node.xyz:hover .mk{transform:rotate(45deg) scale(1.25)}
+  .flag-tag{
+    position:absolute;left:-34px;top:-40px;width:68px;text-align:center;font-size:11.5px;font-weight:800;
+    color:var(--bg);background:var(--gold);border-radius:8px;padding:2px 4px;letter-spacing:.03em;z-index:6;
+  }
+  .node.h .flag-tag{top:auto;bottom:-40px}
+  .node.you .flag-tag::after{
+    content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);
+    border:5px solid transparent;border-top-color:var(--gold);border-bottom:0;
+  }
+  .node.h .flag-tag::after{display:none}
+
+  /* 卡片（懒渲染注入） */
+  .card{
+    position:absolute;left:-96px;width:192px;padding:10px 12px 9px;border-radius:16px;
+    background:var(--layer1);border:2.5px solid var(--u-c2);box-shadow:var(--shadow);
+    text-align:center;cursor:pointer;z-index:4;
+  }
+  .node.h .card{border-color:var(--h-c2)}
+  .node.u .card{top:26px}
+  .node.u.stem1 .card{top:112px}
+  .node.h .card{bottom:26px}
+  .node.h.stem1 .card{bottom:112px}
+  .card::before{ /* 与轨道的连接杆 */
+    content:"";position:absolute;left:50%;width:2.5px;background:var(--u-c2);opacity:.6;
+  }
+  .node.u .card::before{bottom:100%;height:26px}
+  .node.u.stem1 .card::before{height:112px}
+  .node.h .card::before{top:100%;height:26px}
+  .node.h.stem1 .card::before{height:112px}
+  .node.h .card::before{background:var(--h-c2)}
+  .card .ttl{font-size:15.5px;font-weight:800;color:var(--ink);line-height:1.35}
+  .card .tt{font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums;margin-top:1px}
+  .card .one{font-size:12.8px;color:var(--ink3);line-height:1.5;margin-top:5px}
+  .card:hover{border-color:var(--u-c1);transform:translateY(-2px)}
+  .node.h .card:hover{border-color:var(--h-c1)}
+  .node.candidate .card,.node.model .card{border-style:dashed}
+  .node.focused .card{outline:3px solid var(--gold);outline-offset:2px}
+  body.short .card{left:-84px;width:168px;padding:8px 8px 7px}
+  body.short .card .ttl{font-size:14px} body.short .card .one{font-size:12px}
+
+  /* ---------- 童画几何插画（纯 CSS·零图片） ---------- */
+  .mini{position:relative;width:74px;height:60px;margin:2px auto 6px}
+  .mini i{position:absolute;display:block}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes twinkle{0%,100%{opacity:.35}50%{opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe2{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  body.reduce .mini i{animation:none!important}
+
+  /* —— 上轨·宇宙 —— */
+  .a-bang .a{left:29px;top:22px;width:16px;height:16px;background:#F7C948;border-radius:50%;animation:breathe2 2.6s infinite}
+  .a-bang .b,.a-bang .c,.a-bang .d,.a-bang .e{width:20px;height:4px;background:#E2744B;border-radius:2px;top:28px}
+  .a-bang .b{left:-2px;transform:rotate(-28deg)} .a-bang .c{right:-2px;transform:rotate(28deg)}
+  .a-bang .d{left:27px;top:2px;width:4px;height:16px;transform:rotate(0)} .a-bang .e{left:27px;bottom:2px;width:4px;height:16px}
+  .a-inflate .a{left:14px;top:8px;width:44px;height:44px;border:3px dashed #8D82C9;border-radius:50%;animation:breathe2 3.4s infinite}
+  .a-inflate .b{left:31px;top:25px;width:10px;height:10px;background:#F2A9BE;border-radius:50%}
+  .a-nuclei .a{left:20px;top:14px;width:18px;height:18px;background:#EFA9A9;border-radius:50%}
+  .a-nuclei .b{right:14px;top:24px;width:15px;height:15px;background:#F5B84F;border-radius:50%}
+  .a-nuclei .c{left:30px;bottom:6px;width:12px;height:12px;background:#9FC8DA;border-radius:50%}
+  .a-light .a{left:23px;top:12px;width:26px;height:26px;background:#F7C948;border-radius:50%;animation:breathe2 3s infinite}
+  .a-light .b,.a-light .c{width:16px;height:3.5px;background:#F5A83B;border-radius:2px;top:23px}
+  .a-light .b{left:0} .a-light .c{right:0}
+  .a-light .d{left:34px;top:2px;width:3.5px;height:14px;background:#F5A83B;border-radius:2px}
+  .a-star .a{left:17px;top:2px;width:40px;height:40px;background:#F7C948;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:twinkle 2.8s infinite}
+  .a-star .b{left:2px;bottom:8px;width:10px;height:10px;background:#F5A83B;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%)}
+  .a-star .c{right:0;top:10px;width:8px;height:8px;background:#E8D9BE;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%)}
+  .a-galaxy .a{left:12px;top:5px;width:50px;height:50px;border-radius:50%;
+    background:conic-gradient(from 20deg,#8D82C9,transparent 25%,#6F64AE 50%,transparent 75%,#8D82C9);
+    animation:spin 9s linear infinite}
+  .a-galaxy .b{left:31px;top:24px;width:12px;height:12px;background:#F7E3A1;border-radius:50%}
+  .a-sun .a{left:26px;top:8px;width:22px;height:22px;background:#F7C948;border-radius:50%;animation:breathe2 3.6s infinite}
+  .a-sun .b{left:12px;top:1px;width:50px;height:36px;border:2.5px dashed #C9A24A;border-radius:50%}
+  .a-sun .c{left:8px;top:12px;width:8px;height:8px;background:#7FB0DC;border-radius:50%}
+  .a-cell .a{left:16px;top:8px;width:40px;height:36px;background:#8FBF74;border-radius:46% 54% 52% 48%/60% 52% 48% 42%;animation:floaty 3.4s infinite}
+  .a-cell .b{left:31px;top:20px;width:12px;height:12px;background:#3E7A52;border-radius:50%}
+  .a-cell .c{left:2px;bottom:12px;width:16px;height:3px;background:#5B9B3F;border-radius:2px;transform:rotate(-30deg)}
+  .a-oxy .a{left:18px;top:10px;width:20px;height:20px;background:#9FC8DA;border-radius:50%;animation:floaty 3s infinite}
+  .a-oxy .b{right:12px;top:4px;width:13px;height:13px;background:#B7D8E8;border-radius:50%;animation:floaty 3s .6s infinite}
+  .a-oxy .c{left:6px;bottom:8px;width:11px;height:11px;background:#9FC8DA;border-radius:50%;animation:floaty 3s 1.1s infinite}
+  .a-oxy .d{right:2px;bottom:14px;width:16px;height:16px;background:#B7D8E8;border-radius:50%;animation:floaty 3s .3s infinite}
+  .a-trilo .a{left:15px;top:10px;width:44px;height:34px;background:#C98A5B;border-radius:50% 50% 44% 44%/60% 60% 40% 40%;
+    background-image:repeating-linear-gradient(90deg,transparent 0 8px,#A96F42 8px 10.5px)}
+  .a-trilo .b{left:20px;top:16px;width:6px;height:6px;background:#3B2A1E;border-radius:50%}
+  .a-trilo .c{right:20px;top:16px;width:6px;height:6px;background:#3B2A1E;border-radius:50%}
+  .a-dino .a{left:6px;top:22px;width:56px;height:26px;background:#79B653;border-radius:14px 22px 18px 10px}
+  .a-dino .b{left:14px;top:16px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:12px solid #5B9B3F}
+  .a-dino .c{left:28px;top:14px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:12px solid #5B9B3F}
+  .a-dino .d{left:42px;top:16px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:12px solid #5B9B3F}
+  .a-dino .e{left:0;top:26px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-right:14px solid #79B653}
+  .a-meteor .a{right:8px;top:14px;width:26px;height:26px;background:#A9A29B;border-radius:50% 45% 55% 48%;border:3px solid #7E7870}
+  .a-meteor .b{left:6px;top:34px;width:14px;height:6px;background:#F5A83B;border-radius:3px;transform:rotate(-30deg)}
+  .a-meteor .c{left:16px;top:24px;width:10px;height:5px;background:#F7C948;border-radius:3px;transform:rotate(-30deg);opacity:.85}
+  .a-human .a{left:30px;top:2px;width:14px;height:14px;background:#E8B04B;border-radius:50%}
+  .a-human .b{left:33px;top:17px;width:8px;height:18px;background:#E2744B;border-radius:4px}
+  .a-human .c{left:22px;top:19px;width:8px;height:3.5px;background:#E2744B;border-radius:2px;transform:rotate(38deg)}
+  .a-human .d{right:22px;top:19px;width:8px;height:3.5px;background:#E2744B;border-radius:2px;transform:rotate(-38deg)}
+  .a-human .e{left:26px;bottom:4px;width:7px;height:12px;background:#8C5A3A;border-radius:3px;transform:rotate(14deg)}
+  .a-human .f{right:26px;bottom:4px;width:7px;height:12px;background:#8C5A3A;border-radius:3px;transform:rotate(-14deg)}
+  .a-factory .a{left:12px;top:20px;width:44px;height:26px;background:#9A8F80;border-radius:4px}
+  .a-factory .b{left:26px;top:6px;width:16px;height:16px;background:#9A8F80;clip-path:polygon(50% 0,100% 100%,0 100%)}
+  .a-factory .c{left:16px;top:0;width:8px;height:14px;background:#7E7466;border-radius:2px}
+  .a-factory .d{left:13px;top:-8px;width:10px;height:9px;background:#C9C2B4;border-radius:50%;animation:floaty 3s infinite}
+  .a-chip .a{left:17px;top:10px;width:40px;height:34px;background:#2F6FB0;border-radius:6px;border:3px solid #14507E}
+  .a-chip .b{left:27px;top:20px;width:8px;height:8px;background:#7FB4E0;border-radius:2px}
+  .a-chip .c{left:39px;top:20px;width:8px;height:8px;background:#7FB4E0;border-radius:2px}
+  .a-chip .d{left:27px;top:31px;width:20px;height:3px;background:#7FB4E0;border-radius:2px}
+  .a-gem .a{left:21px;top:3px;width:32px;height:32px;background:linear-gradient(135deg,#F7C948,#B98A3A 45%,#8D82C9);transform:rotate(45deg);border-radius:6px;animation:twinkle 3s infinite}
+  .a-gem .b{left:8px;bottom:8px;width:9px;height:9px;background:#F7C948;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%)}
+  .a-q .a{left:14px;top:4px;width:46px;height:46px;border:3px dashed #9A8F80;border-radius:50%}
+  .a-q .b{left:28px;top:8px;width:18px;height:34px}
+  .a-q .b::after{content:"?";font:800 30px/34px Georgia,serif;color:#9A6B1F;text-align:center;display:block}
+  .a-rocket .a{left:28px;top:4px;width:18px;height:34px;background:#D9CDB9;border-radius:9px 9px 4px 4px}
+  .a-rocket .b{left:31px;top:0;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #E2744B}
+  .a-rocket .c{left:20px;top:28px;width:0;height:0;border-top:9px solid transparent;border-bottom:4px solid transparent;border-right:10px solid #8D82C9}
+  .a-rocket .d{right:20px;top:28px;width:0;height:0;border-top:9px solid transparent;border-bottom:4px solid transparent;border-left:10px solid #8D82C9}
+  .a-rocket .e{left:32px;bottom:2px;width:10px;height:8px;background:#F5A83B;border-radius:50% 50% 50% 50%/30% 30% 70% 70%;animation:twinkle 1.2s infinite}
+  .a-redgiant .a{left:8px;top:4px;width:52px;height:52px;background:#E2574C;border-radius:50%;animation:breathe2 4s infinite}
+  .a-redgiant .b{left:50px;top:36px;width:10px;height:10px;background:#7FB0DC;border-radius:50%}
+  .a-ember .a{left:22px;top:10px;width:32px;height:32px;background:#5B5F6E;border-radius:50%;box-shadow:0 0 14px 3px rgba(218,169,78,.35)}
+  .a-ember .b{left:8px;top:20px;width:5px;height:5px;background:#D4A94E;border-radius:50%;animation:twinkle 3.4s infinite}
+  .a-ember .c{right:6px;top:12px;width:4px;height:4px;background:#9FA093;border-radius:50%;animation:twinkle 3.4s 1s infinite}
+  .a-ember .d{right:14px;bottom:8px;width:5px;height:5px;background:#D4A94E;border-radius:50%;animation:twinkle 3.4s 2s infinite}
+
+  /* —— 下轨·人的一生 —— */
+  .a-sea .a,.a-sea .b,.a-sea .c{left:0;width:74px;height:9px;border:3px solid #7FB0DC;border-color:#7FB0DC transparent transparent transparent;border-radius:50%}
+  .a-sea .a{top:8px} .a-sea .b{top:26px} .a-sea .c{top:44px}
+  .a-sea .d{left:12px;top:14px;width:6px;height:6px;background:#F7C948;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:twinkle 2.6s infinite}
+  .a-sea .e{right:8px;top:38px;width:7px;height:7px;background:#F7E3A1;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:twinkle 2.6s 1.3s infinite}
+  .a-spark .a{left:2px;top:20px;width:26px;height:26px;background:#F2A9BE;border-radius:50%}
+  .a-spark .b{right:2px;top:20px;width:26px;height:26px;background:#9FC8DA;border-radius:50%}
+  .a-spark .c{left:30px;top:26px;width:14px;height:14px;background:#F7C948;border-radius:50%;animation:breathe2 2.4s infinite}
+  .a-womb .a{left:9px;top:2px;width:56px;height:56px;background:#F2C9DE;border-radius:54% 46% 50% 50%/52% 48% 55% 45%;border:3px solid #C4678A}
+  .a-womb .b{left:22px;top:18px;width:24px;height:18px;border:5px solid #C4678A;border-color:#C4678A transparent transparent transparent;border-radius:50%;transform:rotate(-40deg)}
+  .a-womb .c{left:38px;top:38px;width:7px;height:7px;background:#7FB0DC;border-radius:50%;animation:floaty 2.6s infinite}
+  .a-womb .d{left:20px;top:40px;width:5px;height:5px;background:#9FC8DA;border-radius:50%;animation:floaty 2.6s .8s infinite}
+  .a-cry .a{left:26px;top:4px;width:22px;height:20px;background:#F2C9DE;border-radius:48% 48% 46% 46%}
+  .a-cry .b{left:33px;top:16px;width:8px;height:9px;background:#B3452C;border-radius:50%}
+  .a-cry .c{right:2px;top:8px;width:16px;height:16px;border:3.5px solid #E2744B;border-color:#E2744B transparent transparent transparent;border-radius:50%;transform:rotate(46deg)}
+  .a-cry .d{right:12px;top:2px;width:24px;height:24px;border:3.5px solid #E2744B;border-color:#E2744B transparent transparent transparent;border-radius:50%;transform:rotate(46deg);opacity:.55}
+  .a-baby .a{left:24px;top:2px;width:26px;height:24px;background:#F6D8C4;border-radius:50%}
+  .a-baby .b{left:30px;top:11px;width:4px;height:4px;background:#3B2A1E;border-radius:50%}
+  .a-baby .c{right:30px;top:11px;width:4px;height:4px;background:#3B2A1E;border-radius:50%}
+  .a-baby .d{left:26px;top:26px;width:22px;height:18px;background:#F2A9BE;border-radius:8px 8px 12px 12px}
+  .a-baby .e{left:36px;top:-4px;width:10px;height:8px;border:3px solid #C4678A;border-color:transparent transparent #C4678A transparent;border-radius:50%}
+  .a-steps .a{left:10px;top:2px;width:6px;height:10px;background:#E8B04B;border-radius:3px}
+  .a-steps .b{left:8px;top:14px;width:10px;height:14px;background:#E2744B;border-radius:4px}
+  .a-steps .c{left:12px;bottom:16px;width:6px;height:16px;background:#8C5A3A;border-radius:3px;transform:rotate(22deg)}
+  .a-steps .d{left:22px;bottom:16px;width:6px;height:16px;background:#8C5A3A;border-radius:3px;transform:rotate(-22deg)}
+  .a-steps .e{left:0;bottom:8px;width:56px;height:5px;background:var(--border);border-radius:3px}
+  .a-why .a{left:24px;top:6px;width:26px;height:24px;background:#F6D8C4;border-radius:50%}
+  .a-why .b{left:30px;top:26px;width:14px;height:24px}
+  .a-why .b::after{content:"?";font:800 22px/24px Georgia,serif;color:#9A3A24;display:block;text-align:center}
+  .a-why .c{left:14px;top:0;width:8px;height:8px;background:#F2A9BE;border-radius:50%;animation:floaty 2.8s infinite}
+  .a-why .d{left:6px;top:-6px;width:5px;height:5px;background:#C4678A;border-radius:50%;animation:floaty 2.8s .5s infinite}
+  .a-ball .a{left:8px;bottom:2px;width:38px;height:38px;background:#F2A9BE;border-radius:50%;border:3px solid #C4678A;animation:floaty 2.6s infinite}
+  .a-ball .b{left:22px;bottom:15px;width:11px;height:11px;background:#B3452C;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)}
+  .a-ball .c{right:4px;top:6px;width:12px;height:12px;background:#F7C948;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:twinkle 2.4s infinite}
+  .a-storm .a{left:16px;top:2px;width:30px;height:30px;background:#F2A9BE;border-radius:50%;border:3px solid #C4678A;animation:breathe2 2.2s infinite}
+  .a-storm .b{right:6px;top:10px;width:16px;height:26px}
+  .a-storm .b::after{content:"♪";font:800 22px/26px Georgia,serif;color:#7C4D9E;display:block}
+  .a-storm .c{left:2px;bottom:4px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:16px solid #9A6B1F}
+  .a-walk .a{left:32px;top:0;width:14px;height:14px;background:#E8B04B;border-radius:50%}
+  .a-walk .b{left:34px;top:15px;width:10px;height:20px;background:#4A6FA0;border-radius:4px}
+  .a-walk .c{left:22px;top:17px;width:13px;height:15px;background:#E2744B;border-radius:5px}
+  .a-walk .d{left:28px;bottom:2px;width:6px;height:18px;background:#8C5A3A;border-radius:3px;transform:rotate(18deg)}
+  .a-walk .e{right:24px;bottom:2px;width:6px;height:18px;background:#8C5A3A;border-radius:3px;transform:rotate(-18deg)}
+  .a-house .a{left:8px;top:22px;width:44px;height:30px;background:#EBE1CF;border:3px solid #B97B4E;border-radius:4px}
+  .a-house .b{left:2px;top:4px;width:56px;height:0;border-left:28px solid transparent;border-right:28px solid transparent;border-bottom:20px solid #B3452C}
+  .a-house .c{left:26px;top:32px;width:12px;height:20px;background:#8C5A3A;border-radius:3px 3px 0 0}
+  .a-house .d{left:14px;top:28px;width:9px;height:8px;background:#F2A9BE;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+  .a-mount .a{left:0;bottom:6px;width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:36px solid #7C4D9E}
+  .a-mount .b{right:0;bottom:6px;width:0;height:0;border-left:24px solid transparent;border-right:24px solid transparent;border-bottom:28px solid #8D82C9}
+  .a-mount .c{left:24px;top:12px;width:3px;height:14px;background:#9A6B1F}
+  .a-mount .d{left:27px;top:12px;width:12px;height:8px;background:#F7C948;clip-path:polygon(0 50%,50% 0,100% 50%,50% 100%)}
+  .a-lens .a{left:10px;top:2px;width:36px;height:36px;border:6px solid #4A6FA0;border-radius:50%}
+  .a-lens .b{left:44px;top:32px;width:6px;height:22px;background:#2F5A8A;border-radius:3px;transform:rotate(-45deg)}
+  .a-lens .c{left:22px;top:13px;width:12px;height:11px;background:#E2574C;clip-path:polygon(50% 0,100% 36%,82% 100%,18% 100%,0 36%)}
+  .a-sprout .a{left:0;bottom:2px;width:74px;height:10px;background:#C08A57;border-radius:5px}
+  .a-sprout .b{left:34px;bottom:12px;width:6px;height:22px;background:#5B9B3F;border-radius:3px}
+  .a-sprout .c{left:40px;bottom:26px;width:22px;height:12px;background:#79B653;border-radius:2px 100% 2px 100%;transform:rotate(-16deg)}
+  .a-sprout .d{left:12px;bottom:20px;width:18px;height:10px;background:#6BAA48;border-radius:100% 2px 100% 2px;transform:rotate(-12deg)}
+  .a-swing .a{left:6px;top:0;width:3px;height:44px;background:#8C5A3A}
+  .a-swing .b{right:6px;top:0;width:3px;height:44px;background:#8C5A3A}
+  .a-swing .c{left:4px;top:42px;width:58px;height:5px;background:var(--border);border-radius:3px;transform-origin:8px 45px;animation:floaty 4s infinite}
+  .a-swing .d{left:20px;top:30px;width:26px;height:14px;background:#F2A9BE;border-radius:8px}
+  .a-lamp .a{left:16px;top:0;width:42px;height:20px;background:#F5B84F;clip-path:polygon(20% 0,80% 0,100% 100%,0 100%)}
+  .a-lamp .b{left:24px;top:24px;width:26px;height:26px;background:rgba(247,201,72,.4);border-radius:50%;animation:breathe2 3s infinite}
+  .a-lamp .c{left:22px;bottom:0;width:30px;height:6px;background:#8C5A3A;border-radius:3px}
+  .a-moon .a{left:22px;top:2px;width:34px;height:34px;background:#F7E3A1;border-radius:50%;box-shadow:inset 9px -5px 0 #E0C878}
+  .a-moon .b{left:2px;bottom:4px;width:46px;height:16px;background:#D9CDB9;border-radius:8px 12px 4px 4px}
+  .a-moon .c{left:6px;bottom:12px;width:12px;height:9px;background:#F6F2E4;border-radius:50%}
+  .a-moon .d{right:2px;top:18px;width:5px;height:5px;background:#F7C948;border-radius:50%;animation:twinkle 3s infinite}
+  .a-album .a{left:8px;top:6px;width:58px;height:46px;background:#EBE1CF;border:3.5px solid #B97B4E;border-radius:8px}
+  .a-album .b{left:29px;top:18px;width:16px;height:15px;background:#E2574C;clip-path:polygon(50% 0,100% 36%,82% 100%,18% 100%,0 36%)}
+  .a-album .c{left:60px;top:2px;width:8px;height:8px;background:#F7C948;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:twinkle 2.8s infinite}
+  .a-helix .a{left:22px;top:0;width:5px;height:54px;background:#4A6FA0;border-radius:3px;transform:skewY(-10deg)}
+  .a-helix .b{right:22px;top:0;width:5px;height:54px;background:#7C4D9E;border-radius:3px;transform:skewY(10deg)}
+  .a-helix .c{left:18px;top:6px;width:38px;height:5px;background:#E8B04B;border-radius:3px;transform:rotate(-8deg)}
+  .a-helix .d{left:18px;top:26px;width:38px;height:5px;background:#E8B04B;border-radius:3px;transform:rotate(8deg)}
+  .a-helix .e{left:18px;top:46px;width:38px;height:5px;background:#E8B04B;border-radius:3px;transform:rotate(-8deg)}
+  .a-dust .a{left:16px;top:14px;width:42px;height:42px;border:3px dashed #9FA093;border-radius:50%;opacity:.7}
+  .a-dust .b{left:31px;top:0;width:8px;height:8px;background:#F7C948;border-radius:50%;animation:floaty 3s infinite}
+  .a-dust .c{left:10px;top:8px;width:7px;height:7px;background:#F2A9BE;border-radius:50%;animation:floaty 3s .7s infinite}
+  .a-dust .d{right:8px;top:12px;width:6px;height:6px;background:#9FC8DA;border-radius:50%;animation:floaty 3s 1.4s infinite}
+  .a-dust .e{left:34px;bottom:2px;width:8px;height:8px;background:#8D82C9;border-radius:50%;animation:floaty 3s 2s infinite}
+
+  /* ---------- 交汇光柱（宇宙照镜处） ---------- */
+  #beam{
+    position:absolute;top:16%;height:68%;width:5px;margin-left:-2.5px;z-index:8;
+    background:linear-gradient(180deg,var(--beam-glow),rgba(212,169,78,.85),var(--beam-glow));
+    border-radius:3px;opacity:.75;transform-origin:50% 0;
+  }
+  #beam.lit{opacity:1;box-shadow:0 0 22px 5px var(--beam-glow)}
+  body.short #beam{top:13%;height:74%}
+  #beam .dm{
+    position:absolute;left:50%;width:16px;height:16px;background:linear-gradient(135deg,#F7C948,#8D82C9);
+    transform:translateX(-50%) rotate(45deg);border-radius:3px;border:2px solid #FFFDF4;
+  }
+  #beam .dm1{top:-8px} #beam .dm2{bottom:-8px}
+  #conv{
+    position:absolute;top:46%;left:-125px;width:250px;text-align:center;z-index:9;
+    font-size:13.5px;font-weight:800;color:var(--accent-deep);letter-spacing:.06em;
+  }
+  #conv span{
+    display:inline-block;background:var(--panel);border:2px solid var(--gold);border-radius:999px;
+    padding:4px 14px;box-shadow:var(--shadow);
+  }
+  body.reduce #beam{box-shadow:none}
+
+  /* ---------- XYZ 光带（下轨成年-中年） ---------- */
+  #xyzband{position:absolute;top:calc(84% - 46px);height:92px;z-index:2;background:var(--xyz-grad);border-radius:12px}
+  body.short #xyzband{top:calc(87% - 46px)}
+  #xyzlabel{
+    position:absolute;top:calc(84% - 74px);transform:translateX(-50%);z-index:3;white-space:nowrap;
+    font-size:12px;font-weight:800;color:var(--gold);background:var(--panel);
+    border:1.5px dashed var(--gold);border-radius:999px;padding:3px 12px;
+  }
+  body.short #xyzlabel{top:calc(87% - 72px)}
+
+  /* ---------- 区域装饰（概率之海 / 简并长夜 / 不朽之海） ---------- */
+  .zone{position:absolute;height:64px;z-index:1;opacity:.85}
+  .zone .zl{position:absolute;top:14px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;color:var(--ink2);letter-spacing:.14em}
+  #zone-sea{top:calc(84% + 16px)}
+  #zone-sea .waves{position:absolute;inset:34px 0 0;background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(127,176,220,.4) 26px 30px);border-radius:6px}
+  #zone-degen{top:calc(16% + 16px)}
+  #zone-degen .stars{position:absolute;inset:30px 0 0;background:radial-gradient(circle,rgba(159,160,147,.5) 1.5px,transparent 1.6px) 0 0/44px 34px repeat}
+  #zone-after{top:calc(84% + 16px)}
+  #zone-after .stars{position:absolute;inset:30px 0 0;background:radial-gradient(circle,rgba(247,201,72,.4) 1.5px,transparent 1.6px) 0 12px/52px 40px repeat}
+
+  /* ---------- 底部导航条 ---------- */
+  #pbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;gap:10px;
+    padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));
+    background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:2px solid var(--border);
+  }
+  #pbar .lab{font-size:11.5px;color:var(--ink2);white-space:nowrap;font-weight:700}
+  #ptrack{position:relative;flex:1;height:34px;cursor:pointer}
+  #ptrack .line{position:absolute;left:0;right:0;top:16px;height:5px;border-radius:3px;background:var(--layer3)}
+  #pfill{position:absolute;left:0;top:16px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--u-c1),var(--h-c1));width:0}
+  #pfill::after{content:"";position:absolute;right:-7px;top:-5px;width:15px;height:15px;border-radius:50%;background:var(--gold);border:2.5px solid var(--bg)}
+  .pt{
+    position:absolute;top:8px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;
+    background:var(--u-c1);border:1.5px solid var(--bg);cursor:pointer;padding:0;
+  }
+  .pt:hover{transform:scale(1.6);background:var(--gold)}
+  .pt.human{top:19px;background:var(--h-c1)}
+  #pbtns{display:flex;gap:6px}
+  .jq{min-height:34px;padding:0 10px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--layer1);color:var(--ink2);font-size:12px;font-weight:700;white-space:nowrap}
+  .jq:hover{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+
+  /* ---------- 模态（节点卡 / 年龄 / 推荐 / 帮助） ---------- */
+  .modal{
+    position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+    background:rgba(20,16,12,.45);padding:18px;
+  }
+  .modal.open{display:flex}
+  .mbox{
+    background:var(--bg);border:3px solid var(--border-strong);border-radius:22px;
+    max-width:480px;width:100%;max-height:86vh;overflow:auto;padding:22px 22px 20px;position:relative;
+    box-shadow:0 10px 0 rgba(0,0,0,.14);
+  }
+  .mbox h3{margin:0 0 4px;font-size:22px;color:var(--ink);letter-spacing:.02em}
+  .mbox .mt{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .mbox .story{font-size:16.5px;line-height:1.9;margin:12px 0;color:var(--ink);
+    font-family:Georgia,'Songti SC','Source Han Serif SC',serif}
+  .mclose{
+    position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;
+    border:2px solid var(--border-strong);background:var(--layer1);color:var(--ink);font-size:16px;
+  }
+  .mclose:hover{background:var(--accent);color:var(--bg)}
+  .badge{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 10px;margin-left:8px;vertical-align:2px;letter-spacing:.05em}
+  .badge.cand{color:#FFFDF4;background:#8A6410}
+  .badge.model{color:#FFFDF4;background:#4A6FA0}
+  .badge.you{color:#2A1F10;background:#F7C948}
+  .badge.xyz{color:#2A1F10;background:linear-gradient(90deg,#F7C948,#8D82C9)}
+  .mlink{
+    display:inline-block;margin:10px 8px 0 0;min-height:44px;line-height:44px;padding:0 18px;border-radius:999px;
+    background:var(--accent);color:#FFF6E9;font-size:14.5px;font-weight:700;text-decoration:none;
+  }
+  body.night .mlink{color:#2A1F10}
+  .mlink.ghost{background:var(--layer1);color:var(--link);border:2px solid var(--border-strong)}
+  .mtip{
+    margin-top:14px;background:rgba(62,122,82,.09);border:2px dashed var(--ok);border-radius:14px;
+    padding:10px 14px;font-size:13.5px;color:var(--ink3);line-height:1.75;
+  }
+  .mtip b{color:var(--ok)}
+  .m-art{width:74px;margin:6px auto 0;transform:scale(1.9);transform-origin:top center;height:114px}
+  .modal h3.center{text-align:center}
+  .modal .modal-art-wrap{padding-top:6px}
+
+  /* 年龄选择器 */
+  #age-box{max-width:430px;text-align:center}
+  #age-big{font-size:64px;font-weight:800;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
+  #age-big small{font-size:20px;color:var(--ink2);font-weight:700}
+  #age-range{width:100%;margin:14px 0 4px;accent-color:var(--accent)}
+  #age-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px}
+  #age-num{width:88px;font-size:20px;text-align:center;padding:8px;border-radius:12px;border:2px solid var(--border-strong);background:var(--layer1);color:var(--ink)}
+  #age-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:14px 0 4px}
+  .chip{min-height:38px;padding:0 13px;border-radius:999px;border:2px solid var(--border-strong);background:var(--layer1);color:var(--ink2);font-size:13.5px;font-weight:700}
+  .chip:hover{background:var(--accent);color:#FFF6E9;border-color:var(--accent)}
+  .mrow{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .go{min-height:50px;padding:0 26px;border-radius:999px;border:0;background:var(--accent);color:#FFF6E9;font-size:17px;font-weight:800;box-shadow:0 4px 0 var(--accent-deep)}
+  body.night .go{color:#2A1F10;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+  .go:active{transform:translateY(2px);box-shadow:none}
+  .go.ghost{background:var(--layer1);color:var(--ink2);border:2px solid var(--border-strong);box-shadow:none}
+
+  /* 三章推荐卡 */
+  .rec{display:flex;gap:12px;align-items:flex-start;background:var(--layer1);border:2px solid var(--border);border-radius:16px;padding:12px 14px;margin:10px 0;text-align:left}
+  .rec .no{flex:0 0 30px;height:30px;border-radius:50%;background:var(--accent);color:#FFF6E9;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center}
+  body.night .rec .no{color:#2A1F10}
+  .rec a{font-size:15.5px;font-weight:800;color:var(--link);text-decoration:none;border-bottom:2px solid var(--border-strong)}
+  .rec a:hover{color:var(--accent);border-color:var(--accent)}
+  .rec .why{font-size:13px;color:var(--ink2);margin-top:3px;line-height:1.65}
+
+  .mnote{font-size:12.5px;color:var(--ink2);line-height:1.8;margin-top:14px;border-top:1.5px dashed var(--border);padding-top:10px}
+  .mnote b{color:var(--accent-deep)}
+
+  #hint{
+    position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:40;pointer-events:none;
+    font-size:13px;color:var(--ink2);background:var(--panel);border:1.5px solid var(--border);
+    border-radius:999px;padding:5px 16px;transition:opacity .8s;white-space:nowrap;
+  }
+  #hint.off{opacity:0}
+
+  /* ---------- 动效关照 ---------- */
+  body.reduce *{transition-property:none!important;animation-duration:.001s!important}
+  @media (prefers-reduced-motion:reduce){
+    .node.you .mk,#beam,.mini i{animation:none!important}
+    #canvas.anim .node,#canvas.anim .tick,#canvas.anim .zone{transition:none}
+    #hint{transition:none}
+  }
+  @media (max-width:640px){
+    #hud .brand small{display:none}
+    #nowbar{display:none}
+    .card{left:-84px;width:168px}
+    .mini{transform:scale(.86);transform-origin:center bottom}
+    #conv{left:-105px;width:210px;font-size:12px}
+    #xyzlabel{font-size:11px}
+    #pbar .lab{display:none}
+  }
+  @media (max-height:640px){
+    body.short .card .one{display:none}
+  }
+</style>
+</head>
+<body>
+<noscript><div style="padding:80px 24px;text-align:center;font-size:18px">《双时间线卷轴》需要 JavaScript 才能滑动。<br>请换一个允许脚本的浏览器打开，或先读《生命之书》主书与本页链接的各卷。</div></noscript>
+
+<!-- 顶栏 -->
+<nav id="hud" aria-label="卷轴工具栏">
+  <span class="brand">生命之书<small>· 双时间线卷轴</small></span>
+  <span class="sp"></span>
+  <button class="hbtn pulse" id="btn-age" type="button">🎂 我的年龄</button>
+  <button class="hbtn" id="btn-scale" type="button" aria-label="切换时间尺度">尺度 · 对数</button>
+  <button class="hbtn round" id="btn-tts" type="button" aria-label="朗读当前两个节点" title="朗读当前节点">🔊</button>
+  <button class="hbtn round" id="btn-night" type="button" aria-label="切换日夜主题" aria-pressed="false" title="日夜主题">🌙</button>
+  <button class="hbtn round" id="btn-help" type="button" aria-label="帮助" title="帮助">?</button>
+</nav>
+
+<!-- 舞台 -->
+<main id="stage" tabindex="0" role="group" aria-label="双时间线卷轴滑动区：方向键左右滑动，点击节点看故事">
+  <div id="canvas" aria-hidden="false">
+    <div class="rail" id="rail-u"></div>
+    <div class="rail" id="rail-h"></div>
+    <div id="spine"></div>
+    <div id="beam" aria-hidden="true"><span class="dm dm1"></span><span class="dm dm2"></span></div>
+    <div id="conv" aria-hidden="true"><span>宇宙开始通过人看自己</span></div>
+    <div id="xyzband" aria-hidden="true"></div>
+    <div id="xyzlabel">XYZ 时代：认识使疾病消退（早看见 · 早修补 · 不承诺消灭）</div>
+    <div class="zone" id="zone-sea" aria-hidden="true"><span class="zl">概 率 之 海 · 还 没 到 妈 妈 肚 子 里</span><span class="waves"></span></div>
+    <div class="zone" id="zone-degen" aria-hidden="true"><span class="zl">简 并 长 夜 · 几 乎 什 么 都 没 有</span><span class="stars"></span></div>
+    <div class="zone" id="zone-after" aria-hidden="true"><span class="zl">不 朽 之 海 · 四 种 不 朽</span><span class="stars"></span></div>
+  </div>
+</main>
+
+<span class="lane-chip" id="chip-u">上轨 <b>宇宙的一生</b> · 138 亿年 → 100 万亿年</span>
+<span class="lane-chip" id="chip-h">下轨 <b>一个人的一生</b> · 相遇之前 → 之后</span>
+<div id="nowbar" aria-live="off"><span id="now-u">上轨 <b>—</b></span><span id="now-h">下轨 <b>—</b></span></div>
+<div id="hint">拖动 · 滚轮 · ← → 键滑动卷轴 · 点击节点听故事</div>
+
+<!-- 底部导航 -->
+<div id="pbar" aria-label="卷轴位置导航">
+  <span class="lab">138 亿年前</span>
+  <div id="ptrack"><div class="line"></div><div id="pfill"></div></div>
+  <div id="pbtns">
+    <button class="jq" id="j-start" type="button">起点</button>
+    <button class="jq" id="j-now" type="button">现在</button>
+    <button class="jq" id="j-end" type="button">终点</button>
+  </div>
+  <span class="lab">100 万亿年后</span>
+</div>
+
+<!-- 节点弹卡 -->
+<div class="modal" id="node-modal" role="dialog" aria-modal="true" aria-labelledby="nm-title">
+  <div class="mbox">
+    <button class="mclose" id="nm-close" type="button" aria-label="关闭">✕</button>
+    <div class="modal-art-wrap"><div class="m-art" id="nm-art"></div></div>
+    <h3 class="center" id="nm-title">—</h3>
+    <div class="mt" id="nm-time" style="text-align:center"></div>
+    <div class="story" id="nm-story" style="text-align:center"></div>
+    <div style="text-align:center" id="nm-links"></div>
+    <div class="mtip" id="nm-tip" hidden></div>
+  </div>
+</div>
+
+<!-- 年龄选择器 -->
+<div class="modal open" id="age-modal" role="dialog" aria-modal="true" aria-labelledby="age-title">
+  <div class="mbox" id="age-box">
+    <h3 id="age-title" style="text-align:center">你几岁了？</h3>
+    <p class="mt" style="text-align:center">输入年龄，卷轴会转到你的人生阶段，并推荐三章</p>
+    <div id="age-big">30<small> 岁</small></div>
+    <input id="age-range" type="range" min="0" max="100" value="30" step="1" aria-label="年龄滑杆 0 到 100 岁">
+    <div id="age-row">
+      <input id="age-num" type="number" min="0" max="100" value="30" aria-label="年龄输入">
+      <span class="mt">岁</span>
+    </div>
+    <div id="age-chips"></div>
+    <div class="mrow">
+      <button class="go" id="btn-age-go" type="button">带我去看我的一生</button>
+      <button class="go ghost" id="btn-age-skip" type="button">随便看看</button>
+    </div>
+    <p class="mnote">上轨是<b>宇宙的一生</b>（对数时间尺），下轨是<b>一个人的一生</b>（线性尺）；两轨一起滑动，在「人类出现」处交汇。零联网 · 零收集。</p>
+  </div>
+</div>
+
+<!-- 三章推荐 -->
+<div class="modal" id="rec-modal" role="dialog" aria-modal="true" aria-labelledby="rec-title">
+  <div class="mbox">
+    <button class="mclose" id="rec-close" type="button" aria-label="关闭">✕</button>
+    <h3 id="rec-title" style="text-align:center">这个年纪最该读的三章</h3>
+    <div id="rec-body"></div>
+    <div class="mrow"><button class="go ghost" id="rec-ok" type="button">回到卷轴</button></div>
+  </div>
+</div>
+
+<!-- 帮助 -->
+<div class="modal" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div class="mbox">
+    <button class="mclose" id="help-close" type="button" aria-label="关闭">✕</button>
+    <h3 id="help-title">怎么用这卷轴</h3>
+    <p class="story" style="font-size:15px">
+      · <b>滑动</b>：按住拖动 / 触摸轻扫 / 滚轮 / 键盘 ← →（Shift 加速，Home 到大爆炸，End 到尽头）。<br>
+      · <b>两轨联动</b>：上轨宇宙史与下轨人生同屏同动，在「人类出现 ⇄ 相遇之前」处有一道金光交汇——<b>宇宙开始通过人看自己</b>。<br>
+      · <b>尺度切换</b>：上轨默认对数尺（分段：早期对数 → 近代线性 → 远未来对数）；切到线性尺会看到真实比例——宇宙的历史挤在最左边，这本身就是一课。<br>
+      · <b>点击任何节点</b>：看 30 字小故事，并跳去主书对应卷章。<br>
+      · <b>虚线圆节点 = CANDIDATE</b>（未来推测·候选），双线圆 = MODEL（主流模型推演）——诚实标注，不是预言。<br>
+      · <b>XYZ 时代</b>的金紫光带是同一个标记：认识使疾病消退——更早看见、更好修补，不承诺消灭。
+    </p>
+    <p class="mnote">
+      健康提示引自主书<b>《健康律定稿：六个动词 + 记》</b>：睡够 · 常动 · 吃真食物 · 保持连接 · 护（减少损伤）· 防（预防可预防）· 记（记录=早发现）。<br>
+      本页为科普与哲思卷轴，不替代医疗诊断；红旗症状请就医。<br>
+      《生命之书》主书 <b>life-book-public-v2.0.html</b> · 童画版 <b>life-book-kids-v1.html</b> · 本页零联网、零收集，朗读与主题全在本地。
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ==========================================================
+   数据：上轨 20 节点（宇宙）+ 下轨 20 节点（人）
+   t = 大爆炸后年数 · a = 年龄（岁，受孕为负）
+   ========================================================== */
+var MAIN = './life-book-public-v2.0.html', KIDS = './life-book-kids-v1.html';
+
+var UNIVERSE = [
+ {id:'u-bang',  k:'bang', t:0,            title:'大爆炸',        time:'宇宙 0 秒',
+  one:'一切从比芝麻还小的地方开始', story:'所有的星星那时挤在一点里，热得说不出话——然后，忽然，开始了。',
+  art:'a-bang', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-inf',   k:'inf', t:1e-33,        title:'暴涨',          time:'10⁻³² 秒',
+  one:'宇宙在一瞬间长大了无数倍',   story:'像气球的第一口气：呼一下，空间自己撑开了自己。',
+  art:'a-inflate', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-nuc',   k:'nuc', t:1.14e-6,      title:'原子核成形',    time:'第 3 分钟',
+  one:'最小的积木焊好了',           story:'质子中子手拉手做成氢和氦——星星的原料备齐了。',
+  art:'a-nuclei', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-light', k:'light', t:3.8e5,      title:'第一缕光',      time:'38 万年',
+  one:'雾散了，光第一次跑起来',     story:'宇宙从一锅热雾冷透成透明，光被放了出来——至今还在天上。',
+  art:'a-light', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-star',  k:'star', t:2e8,         title:'第一代恒星',    time:'约 2 亿年',
+  one:'第一颗星星点灯',             story:'氢云抱成团，中心压出了火——黑夜里第一次有了「亮」。',
+  art:'a-star', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-gal',   k:'gal', t:1e9,          title:'银河系雏形',    time:'约 10 亿年',
+  one:'千亿颗星星转成一个大盘子',   story:'我们的家慢慢搅成一座旋涡城，星星在里面绕了一辈子又一辈子。',
+  art:'a-galaxy', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-sun',   k:'sun', t:9.2e9,        title:'太阳系诞生',    time:'92 亿年',
+  one:'太阳点亮，地球出生',         story:'一团星尘饼转啊转：中间点成太阳，边角揉出行星。',
+  art:'a-sun', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-life',  k:'life', t:1.0e10,      title:'海里第一粒生命', time:'约 100 亿年',
+  one:'一个会把自己修好的小泡',     story:'海水里的小泡学会了复制自己——生命：修得过，就活着。',
+  art:'a-cell', link:{href:MAIN+'#ch1',label:'→ 去读星空卷'}},
+ {id:'u-oxy',   k:'oxy', t:1.14e10,      title:'大氧气事件',    time:'24 亿年前',
+  one:'蓝绿藻把天空刷成蓝色',       story:'小植物吐了亿万年气泡，天空慢慢变蓝，河床红了铁锈。',
+  art:'a-oxy', link:{href:MAIN+'#vol4',label:'→ 去读地球卷'}},
+ {id:'u-cam',   k:'cam', t:1.326e10,     title:'寒武纪大爆发',  time:'5.4 亿年前',
+  one:'眼睛与壳一起出现',           story:'忽然大家都长出眼睛和壳——「看见与被看见」开始了。',
+  art:'a-trilo', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-dino',  k:'dino', t:1.365e10,    title:'恐龙时代',      time:'1.5 亿年前',
+  one:'大家伙们统治大地',           story:'长脖子的雷王走了两亿年亲戚路，脚印比浴缸还大。',
+  art:'a-dino', link:{href:MAIN+'#vol4',label:'→ 去读地球卷'}},
+ {id:'u-ast',   k:'ast', t:1.372e10,     title:'小行星之日',    time:'6600 万年前',
+  one:'那天之后，轮到小动物',       story:'一块天空的石头落下，恐龙谢幕——哺乳动物接过了舞台。',
+  art:'a-meteor', link:{href:MAIN+'#vol4',label:'→ 去读地球卷'}},
+ {id:'u-human', k:'human', t:1.3797e10,  title:'人类出现',      time:'138 亿年',
+  one:'宇宙第一次照镜子',           story:'会仰望的动物出现了——宇宙开始通过人，看它自己。',
+  art:'a-human', flag:'you', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-ind',   k:'ind', t:1.38e10-266,  title:'工业革命',      time:'约 250 年前',
+  one:'蒸汽让力量翻倍',             story:'机器替肌肉干起活来，人第一次跑得比马快、亮得比蜡烛多。',
+  art:'a-factory', link:{href:MAIN+'#vol6',label:'→ 去读数字时代卷'}},
+ {id:'u-info',  k:'info', t:1.38e10-56,  title:'信息时代',      time:'约 50 年前',
+  one:'全世界连成一张网',           story:'计算机把世界搬进硅片，知识开始一秒环球。',
+  art:'a-chip', link:{href:MAIN+'#vol6',label:'→ 去读数字时代卷'}},
+ {id:'u-xyz',   k:'xyz', t:1.38e10,      title:'XYZ 时代',      time:'2026 · 现在',
+  one:'认识自己加速',               story:'认识使疾病消退：更早看见、更好修补——不承诺，只努力。',
+  art:'a-gem', flag:'xyz', link:{href:MAIN+'#v21',label:'→ 去读健康律'}},
+ {id:'u-f100',  k:'f100', t:1.38e10+1e2, title:'未来百年',      time:'+100 年',
+  one:'更长的健康，还是更热的地球？', story:'两条路都开着门：更会修身体，或更会伤家园。',
+  art:'a-q', tag:'candidate', tagNote:'CANDIDATE · 未来推测（候选）', link:{href:MAIN+'#vol4',label:'→ 去读地球卷'}},
+ {id:'u-f10k',  k:'f10k', t:1.38e10+1e4, title:'未来万年',      time:'+1 万年',
+  one:'也许成为跨行星的物种',       story:'若学会不弄坏摇篮，摇篮之外的沙坑也许正等着脚印。',
+  art:'a-rocket', tag:'candidate', tagNote:'CANDIDATE · 未来推测（候选）', link:{href:MAIN+'#vol6',label:'→ 去读数字时代卷'}},
+ {id:'u-red',   k:'red', t:1.88e10,      title:'太阳变红',      time:'+50 亿年',
+  one:'太阳老了，吹成红巨星',       story:'太阳膨胀吞掉内行星——地球租约到期的最远推测。',
+  art:'a-redgiant', tag:'model', tagNote:'MODEL · 主流模型推演', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}},
+ {id:'u-deg',   k:'deg', t:1e14,         title:'恒星时代尽头',  time:'100 万亿年',
+  one:'最后一颗星星熄灭',           story:'星星全熄，只剩暗淡余烬——宇宙进入简并的长夜。',
+  art:'a-ember', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}}
+];
+
+var HUMAN = [
+ {id:'h-sea',   k:'sea', a:-1.6, a0:-999, a1:-0.75, title:'相遇之前',      time:'概率之海',
+  one:'还没到妈妈肚子里',           story:'两个家族的星尘走了 138 亿年，正慢慢走向同一个小镇。',
+  art:'a-sea', link:{href:MAIN+'#ch1',label:'→ 星尘户口本（主书·第一章）'}, tip:'健康律 · 连：你本身就是亿万年「连接」的结果。'},
+ {id:'h-con',   k:'con', a:-0.75, a0:-0.75, a1:-0.35, title:'受孕',        time:'孕 0 周',
+  one:'两族星尘合流成一粒光',       story:'两个半颗的种子相遇，合成一粒会发光的种子——就是你。',
+  art:'a-spark', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 胎儿'}, tip:'健康律 · 防：备孕补充叶酸，是给「积木」的第一次进货。'},
+ {id:'h-fet',   k:'fet', a:-0.35, a0:-0.35, a1:-0.05, title:'胎儿',        time:'孕期 2-9 月',
+  one:'在水里造肺',                 story:'你在暖水里练拳踢腿，肺一枝一枝地长——为第一口气备货。',
+  art:'a-womb', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 胎儿'}, tip:'健康律 · 睡+吃真食物：准妈妈睡好、吃真食物，是工地最好的建材。'},
+ {id:'h-birth', k:'birth', a:0, a0:-0.05, a1:1.5, title:'出生',           time:'0 岁',
+  one:'第一声啼哭',                 story:'空气冲进新肺，第一声哭＝风箱开机＝生命正式报到。',
+  art:'a-cry', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 婴儿'}, tip:'健康律 · 连：拥抱与回应，是新生儿的第二口氧气。'},
+ {id:'h-inf',   k:'inf', a:0.5, a0:1.5, a1:3.5, title:'婴儿',             time:'0-3 岁',
+  one:'出厂设置快速更新',           story:'每天长、每夜归档；哭是唯一的语言，也是最诚实的话。',
+  art:'a-baby', link:{href:KIDS+'#k1',label:'→ 童画版 · 大脑市长'}, tip:'健康律 · 睡：婴儿的睡，是最贵的生长激素。'},
+ {id:'h-tod',   k:'tod', a:2, a0:3.5, a1:6.5, title:'幼儿',               time:'1-3 岁',
+  one:'学步与第一个词',             story:'摔一百次，站一百零一次；「妈妈」是写下的第一个程序。',
+  art:'a-steps', link:{href:KIDS+'#k8',label:'→ 童画版 · 你会长大'}, tip:'健康律 · 动：跑与摔，是骨头和勇气的共同体操。'},
+ {id:'h-why',   k:'why', a:4.5, a0:6.5, a1:9.5, title:'童年 · 问号期',    time:'3-6 岁',
+  one:'一天两百个为什么',           story:'问号比身高长得快——市长（大脑）正在城里疯狂布线。',
+  art:'a-why', link:{href:KIDS+'#k1',label:'→ 童画版 · 市长大脑'}, tip:'健康律 · 动：每天在户外玩，眼睛和骨头都靠阳光记账。'},
+ {id:'h-play',  k:'play', a:9.5, a0:9.5, a1:12.5, title:'童年 · 玩伴期',  time:'7-12 岁',
+  one:'玩耍是最正经的工作',         story:'在游戏里练出朋友、规则，和一颗摔得住的心。',
+  art:'a-ball', link:{href:KIDS+'#k5',label:'→ 童画版 · 看不见的卫队'}, tip:'健康律 · 连：友谊是童年练出来的肌肉。'},
+ {id:'h-teen',  k:'teen', a:15, a0:12.5, a1:18.5, title:'青春期',         time:'12-18 岁',
+  one:'身体的变奏曲',               story:'激素风暴加上第二脑改造：情绪先到，前额叶后到。',
+  art:'a-storm', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 青春期'}, tip:'健康律 · 睡：青少年要睡够 8-10 小时——熬夜不是叛逆，是亏欠。'},
+ {id:'h-adult', k:'adult', a:21, a0:18.5, a1:25.5, title:'成年早期',      time:'18-25 岁',
+  one:'带着出厂设置离开家',         story:'进城闯荡，开始给自己当市长——也自己付睡眠的账。',
+  art:'a-walk', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 成年'}, tip:'健康律 · 记：从现在建立体检基线，将来的你会感谢现在的你。'},
+ {id:'h-build', k:'build', a:30, a0:25.5, a1:35.5, title:'成家立业',      time:'25-35 岁',
+  one:'搭自己的城',                 story:'工作、爱人、小家——肩上开始有别人的明天。',
+  art:'a-house', link:{href:MAIN+'#vol2',label:'→ 人与人卷'}, tip:'健康律 · 连：亲密关系不是奢侈品，是健康的地基。'},
+ {id:'h-mid1',  k:'mid1', a:42, a0:35.5, a1:50, title:'中年 · 上半场',    time:'35-50 岁',
+  one:'责任最深的河段',             story:'上有老下有小，修复预算开始减配——保养要启动了。',
+  art:'a-mount', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 中年'}, tip:'健康律 · 防：该做的筛查按时做——火花扑灭在成为火之前。', xyz:true},
+ {id:'h-mid2',  k:'mid2', a:55, a0:50, a1:60, title:'中年 · 下半场',     time:'50-60 岁',
+  one:'认识使疾病消退',             story:'XYZ 最关切的切段：早看见、早修补，慢病退让一寸是一寸。',
+  art:'a-lens', flag:'xyz', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 中年'}, tip:'健康律 · 记：给城装仪表盘——记录就是早发现。', xyz:true},
+ {id:'h-2nd',   k:'2nd', a:65, a0:60, a1:70, title:'初老 · 第二人生',     time:'60-70 岁',
+  one:'第二人生开学',               story:'时间大把还给自己；防跌倒，是头等大事。',
+  art:'a-sprout', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 老年'}, tip:'健康律 · 动+防：练腿与平衡，是给独立生活上的保险。'},
+ {id:'h-old',   k:'old', a:75, a0:70, a1:80, title:'老年',                time:'70-80 岁',
+  one:'慢下来，更深地爱',           story:'脚步慢了，牵挂清楚；与损耗和平共处。',
+  art:'a-swing', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 老年'}, tip:'健康律 · 连：孤独是新时代的吸烟——常去看你的人最贵。'},
+ {id:'h-elder', k:'elder', a:85, a0:80, a1:95, title:'高年',              time:'80-90 岁',
+  one:'故事守护者',                 story:'记忆的门变重了，讲出来的故事却更亮。',
+  art:'a-lamp', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 老年'}, tip:'健康律 · 护：药箱年检、灯光防跌——细节里全是尊严。'},
+ {id:'h-end',   k:'end', a:95, a0:95, a1:998, title:'临终',               time:'最后的修复',
+  one:'安宁疗护：不需赢过死亡的真医学', story:'不抢先、不拖延、不孤单——最后一课，温柔地上完。',
+  art:'a-moon', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 临终'}, tip:'健康律 · 连：陪护者也要被接住——你也值得被照顾。'},
+ {id:'h-mem',   k:'mem', a:100, a0:998, a1:999, title:'之后 · 不朽一',    time:'记忆',
+  one:'你活在爱过你的人心里',       story:'你说过的某句话，会成为别人一生的口头禅。',
+  art:'a-album', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 四种不朽'}, tip:'健康律 · 连：这是连接的最后一次胜利。'},
+ {id:'h-gene',  k:'gene', a:102, a0:999, a1:1000, title:'之后 · 不朽二',  time:'传递',
+  one:'基因、手艺与价值观',         story:'你教过的东西，替你继续活在别人的手上。',
+  art:'a-helix', link:{href:MAIN+'#vol7',label:'→ 时间之河卷 · 四种不朽'}, tip:'健康律 · 记：家族病史记一笔，是留给后人的地图。'},
+ {id:'h-star',  k:'star', a:104, a0:1000, a1:1001, title:'之后 · 不朽三&四', time:'影响与星尘',
+  one:'身体归还宇宙',               story:'原子回炉成新的星尘——四种不朽，最后一种是宇宙级的。',
+  art:'a-dust', link:{href:MAIN+'#vol5',label:'→ 去读星空卷'}, tip:'你身体里的每一粒原子，都比「你」老 138 亿岁。'}
+];
+
+/* 年龄 → 三章推荐（0-100 全覆盖） */
+var RECS = [
+ {max:6,  items:[
+   {t:'童画版 · 市长大脑', href:KIDS+'#k1', why:'先认识城里的市长：大脑永远亮灯，睡觉是夜间工程。'},
+   {t:'童画版 · 风箱肺', href:KIDS+'#k3', why:'第一次学会「吸气 4 拍、呼气 6 拍」的小魔法。'},
+   {t:'童画版 · 你会长大', href:KIDS+'#k8', why:'生长激素夜里上班——好好睡，城自己会长。'}]},
+ {max:12, items:[
+   {t:'童画版 · 看不见的卫队', href:KIDS+'#k5', why:'免疫系统是卫队：疫苗是提前看通缉照片。'},
+   {t:'童画版 · 马路血管', href:KIDS+'#k7', why:'十万公里的马路绕地球两圈半，快递从不迟到。'},
+   {t:'主书 · 你从哪里来', href:MAIN+'#ch1', why:'一座用星星搭的城——你的户口本是星尘做的。'}]},
+ {max:17, items:[
+   {t:'主书 · 头：市长与天线', href:MAIN+'#ch2', why:'正在改造中的「第二脑」：情绪先到，前额叶后到。'},
+   {t:'主书 · 时间之河卷', href:MAIN+'#vol7', why:'青春期一节：激素风暴说明书，读自己像读地图。'},
+   {t:'主书 · 健康律定稿', href:MAIN+'#v21', why:'六个动词+记：现在养成，用一生复利。'}]},
+ {max:29, items:[
+   {t:'主书 · 星尘城', href:MAIN+'#ch1', why:'出厂巅峰期，先知道自己有多贵——身体是星星搭的。'},
+   {t:'主书 · 时间之河卷 · 成年', href:MAIN+'#vol7', why:'静默损耗从现在开始记账，保养手册用起来。'},
+   {t:'主书 · 健康律定稿', href:MAIN+'#v21', why:'睡够、常动、吃真食物——越简单的事越难坚持。'}]},
+ {max:44, items:[
+   {t:'主书 · 时间之河卷 · 成年', href:MAIN+'#vol7', why:'责任最重的河段：修复预算开始减配的十年前就该读。'},
+   {t:'主书 · 看不见的三张网', href:MAIN+'#ch10', why:'神经、免疫、内分泌——三张网的保养法。'},
+   {t:'主书 · 人与人卷', href:MAIN+'#vol2', why:'关系的解剖学：连接是被低估的处方。'}]},
+ {max:59, items:[
+   {t:'主书 · 时间之河卷 · 中年', href:MAIN+'#vol7', why:'全书最该读的一节：这本书就是为这个年纪写的。'},
+   {t:'主书 · 大道至简五件事', href:MAIN+'#final', why:'所有昂贵补品都不如五件事按时发生。'},
+   {t:'主书 · 健康律定稿', href:MAIN+'#v21', why:'护与防两根最重的支柱+记：该查的按时查。'}]},
+ {max:74, items:[
+   {t:'主书 · 时间之河卷 · 老年', href:MAIN+'#vol7', why:'与损耗和平共处：防跌倒是头等大事。'},
+   {t:'主书 · 星空卷', href:MAIN+'#vol5', why:'第二人生配一副宇宙望远镜：尺度谦卑，价值锚定。'},
+   {t:'主书 · 万物有灵卷', href:MAIN+'#vol3', why:'邻居说明书：遛狗、种花、看鸟，都是健康。'}]},
+ {max:100, items:[
+   {t:'主书 · 四种不朽', href:MAIN+'#vol7', why:'河流入海：记忆、传递、影响、星尘——温柔而清楚。'},
+   {t:'主书 · 智慧边界', href:MAIN+'#wisdom', why:'手册说不出的真话：一切认识都有边界，包括这本。'},
+   {t:'主书 · 星空卷', href:MAIN+'#vol5', why:'抬头这个动作：最后一课在头顶三千米之上。'}]}
+];
+
+/* ==========================================================
+   尺度与布局（纯函数 · node 环境可自检）
+   ========================================================== */
+var W = 15000;                       /* 卷轴画布宽 px */
+var GAP_U = 176, GAP_H = 176;        /* 同轨相邻节点最小间距 px（卡片防重叠） */
+var T_H = 1.38e10;                   /* 「现在」：宇宙 138 亿年 */
+var T_B = T_H + 2e4;                 /* 近代线性段终点（+1 万年） */
+var A_MIN = -1.6, A_MAX = 95;        /* 人轨线性尺的年龄域 */
+var H_END = 0.90;                    /* 人轨线性段终点（画布分数） */
+
+function uFrac(t, mode){
+  if(mode === 'linear') return t / 1e14;
+  if(t <= T_H) return Math.log10(1 + t) / Math.log10(1 + T_H) * 0.58;
+  if(t <= T_B) return 0.58 + (t - T_H) / (T_B - T_H) * 0.18;
+  var ltb = Math.log10(T_B);
+  return 0.76 + (Math.log10(t) - ltb) / (14 - ltb) * 0.24;
+}
+function spreadPx(raws, minGap){
+  var out = [], prev = -1e18;
+  for(var i = 0; i < raws.length; i++){
+    var v = Math.max(raws[i], prev + minGap);
+    out.push(v); prev = v;
+  }
+  return out;
+}
+function layoutUniverse(mode){
+  var raws = UNIVERSE.map(function(n){ return uFrac(n.t, mode) * W; });
+  var xs = spreadPx(raws, GAP_U);
+  var m = {};
+  UNIVERSE.forEach(function(n, i){ m[n.id] = xs[i]; });
+  return m;
+}
+function layoutHuman(anchorPx){
+  var raws = HUMAN.map(function(n){
+    if(n.a >= 998) return {key:n.id, x:(0.925 + (n.a - 998) * 0.022) * W};
+    var f = (n.a - A_MIN) / (A_MAX - A_MIN);
+    return {key:n.id, x:(anchorPx / W + f * (H_END - anchorPx / W)) * W};
+  });
+  var xs = spreadPx(raws.map(function(r){ return r.x; }), GAP_H);
+  var m = {};
+  raws.forEach(function(r, i){ m[r.key] = xs[i]; });
+  return m;
+}
+function clampOff(off, vw){
+  var lo = vw / 2 - W, hi = vw / 2;
+  return Math.max(lo, Math.min(hi, off));
+}
+function ageNodeIndex(age){
+  age = Math.max(0, Math.min(100, age));
+  for(var i = 0; i < HUMAN.length; i++){
+    if(HUMAN[i].a0 <= age && age < HUMAN[i].a1) return i;
+  }
+  return HUMAN.length - 1;
+}
+function recFor(age){
+  age = Math.max(0, Math.min(100, age));
+  for(var i = 0; i < RECS.length; i++) if(age <= RECS[i].max) return RECS[i];
+  return RECS[RECS.length - 1];
+}
+
+/* ==========================================================
+   自检（node 环境：node life-book-timeline.js）
+   ========================================================== */
+function selfTests(){
+  var fails = 0, n = 0;
+  function ok(cond, msg){
+    n++;
+    if(!cond){ fails++; console.error('FAIL ' + msg); }
+  }
+  ok(UNIVERSE.length === 20 && HUMAN.length === 40 - 20, 'node count 20+20, got ' + UNIVERSE.length + '+' + HUMAN.length);
+  var ids = {};
+  UNIVERSE.concat(HUMAN).forEach(function(nd){
+    ok(!ids[nd.id], 'unique id ' + nd.id); ids[nd.id] = 1;
+    ok(nd.title && nd.one && nd.story && nd.art && nd.link && nd.link.href.indexOf('./') === 0,
+       'fields+local link ' + nd.id);
+    ok(nd.story.length <= 40, 'story<=40 chars ' + nd.id + ' len=' + nd.story.length);
+  });
+  ['log','linear'].forEach(function(mode){
+    var xs = UNIVERSE.map(function(nd){ return uFrac(nd.t, mode) * W; });
+    for(var i = 1; i < xs.length; i++) ok(xs[i] >= xs[i-1] - 1e-9, 'uFrac monotonic ' + mode + ' #' + i);
+    var sp = spreadPx(xs, GAP_U);
+    for(var j = 1; j < sp.length; j++) ok(sp[j] - sp[j-1] >= GAP_U - 1e-9, 'spread gap ' + mode + ' #' + j);
+    ok(sp[sp.length-1] <= W + 1e-6, 'universe in canvas ' + mode + ' last=' + sp[sp.length-1]);
+    ok(uFrac(0, mode) === 0 && Math.abs(uFrac(1e14, mode) - 1) < 1e-9, 'uFrac endpoints ' + mode);
+  });
+  /* 分段对数尺连续性（边界两侧单调且不倒退） */
+  ok(uFrac(T_H + 1, 'log') >= uFrac(T_H - 1, 'log'), 'segA->segB monotonic');
+  ok(uFrac(T_B + 1, 'log') >= uFrac(T_B - 1, 'log'), 'segB->segC monotonic');
+  /* 人轨：锚定在「人类出现」，之后单调且不越界 */
+  var uMap = layoutUniverse('log');
+  var hMap = layoutHuman(uMap['u-human']);
+  var hxs = HUMAN.map(function(nd){ return hMap[nd.id]; });
+  for(var k = 1; k < hxs.length; k++) ok(hxs[k] > hxs[k-1], 'human monotonic #' + k);
+  ok(hxs[hxs.length-1] < W, 'human in canvas');
+  ok(Math.abs(hMap['h-sea'] - uMap['u-human']) < 1e-9, 'convergence: h-sea anchored at u-human');
+  /* 偏移钳制 */
+  var vw = 1000;
+  ok(clampOff(vw/2, vw) === vw/2 && clampOff(-9e9, vw) === vw/2 - W, 'clamp bounds');
+  /* 年龄映射 */
+  ok(HUMAN[ageNodeIndex(45)].id === 'h-mid1', 'age45->mid1, got ' + HUMAN[ageNodeIndex(45)].id);
+  ok(HUMAN[ageNodeIndex(0)].id === 'h-birth', 'age0->birth');
+  ok(HUMAN[ageNodeIndex(15)].k === 'teen', 'age15->teen');
+  for(var a = 0; a <= 100; a++){
+    var r = recFor(a); ok(r && r.items.length === 3, 'recs cover age ' + a);
+    if(!r || r.items.length !== 3) break;
+  }
+  /* 隐私：数据里不得有外链 */
+  var all = JSON.stringify(UNIVERSE) + JSON.stringify(HUMAN) + JSON.stringify(RECS);
+  ok(!/https?:/.test(all), 'no external URLs in data');
+  console.log((fails === 0 ? 'ALL PASS' : 'FAILED') + ': ' + (n - fails) + '/' + n + ' checks');
+  if(typeof process !== 'undefined' && process.exit) process.exitCode = fails === 0 ? 0 : 1;
+}
+
+if(typeof window === 'undefined'){ selfTests(); return; }
+
+/* ==========================================================
+   浏览器初始化
+   ========================================================== */
+var $ = function(s){ return document.querySelector(s); };
+var stage = $('#stage'), canvas = $('#canvas');
+var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(REDUCE) document.body.classList.add('reduce');
+
+/* ---------- 日夜主题（沿用主书 token 体系） ---------- */
+var nightBtn = $('#btn-night');
+function applyNight(on){
+  document.body.classList.toggle('night', on);
+  nightBtn.textContent = on ? '☀️' : '🌙';
+  nightBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+var stored = null;
+try{ stored = localStorage.getItem('lbt-night'); }catch(e){}
+if(stored === '1' || (stored === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) applyNight(true);
+nightBtn.addEventListener('click', function(){
+  var on = !document.body.classList.contains('night');
+  applyNight(on);
+  try{ localStorage.setItem('lbt-night', on ? '1' : '0'); }catch(e){}
+});
+
+/* ---------- 童画插画 <i> 标记集 ---------- */
+var ART_I = {
+ 'a-bang':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>',
+ 'a-inflate':'<i class="a"></i><i class="b"></i>','a-nuclei':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-light':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-star':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-galaxy':'<i class="a"></i><i class="b"></i>','a-sun':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-cell':'<i class="a"></i><i class="b"></i><i class="c"></i>','a-oxy':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-trilo':'<i class="a"></i><i class="b"></i><i class="c"></i>','a-dino':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>',
+ 'a-meteor':'<i class="a"></i><i class="b"></i><i class="c"></i>','a-human':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i><i class="f"></i>',
+ 'a-factory':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-chip':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-gem':'<i class="a"></i><i class="b"></i>','a-q':'<i class="a"></i><i class="b"></i>','a-rocket':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>',
+ 'a-redgiant':'<i class="a"></i><i class="b"></i>','a-ember':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-sea':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>','a-spark':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-womb':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-cry':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-baby':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>','a-steps':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>',
+ 'a-why':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-ball':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-storm':'<i class="a"></i><i class="b"></i><i class="c"></i>','a-walk':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>',
+ 'a-house':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-mount':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-lens':'<i class="a"></i><i class="b"></i><i class="c"></i>','a-sprout':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>',
+ 'a-swing':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-lamp':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-moon':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>','a-album':'<i class="a"></i><i class="b"></i><i class="c"></i>',
+ 'a-helix':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>','a-dust':'<i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i>'
+};
+function artHTML(cls){ return '<div class="mini ' + cls + '" aria-hidden="true">' + (ART_I[cls] || '') + '</div>'; }
+
+/* ---------- 布局与渲染 ---------- */
+var mode = 'log';
+var uX = {}, hX = {}, uIdx = {}, hIdx = {};
+var elU = [], elH = [];
+var beam = $('#beam'), conv = $('#conv');
+
+function buildNodes(){
+  UNIVERSE.forEach(function(nd, i){
+    var el = document.createElement('div');
+    el.className = 'node u' + (i % 2 ? ' stem1' : '') + (nd.tag ? ' ' + nd.tag : '') + (nd.flag ? ' ' + nd.flag : '');
+    el.dataset.id = nd.id; el.dataset.track = 'u';
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label', nd.title + '：' + nd.one);
+    var flag = nd.flag === 'you' ? '<span class="flag-tag">你在这</span>' :
+               nd.flag === 'xyz' ? '<span class="flag-tag">XYZ</span>' : '';
+    el.innerHTML = '<span class="mk" aria-hidden="true"></span>' + flag;
+    canvas.appendChild(el); elU.push(el); uIdx[nd.id] = i;
+  });
+  HUMAN.forEach(function(nd, i){
+    var el = document.createElement('div');
+    el.className = 'node h' + (i % 2 ? ' stem1' : '') + (nd.tag ? ' ' + nd.tag : '') + (nd.flag ? ' ' + nd.flag : '');
+    el.dataset.id = nd.id; el.dataset.track = 'h';
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label', nd.title + '：' + nd.one);
+    var flag = nd.flag === 'xyz' ? '<span class="flag-tag">XYZ</span>' : '';
+    el.innerHTML = '<span class="mk" aria-hidden="true"></span>' + flag;
+    canvas.appendChild(el); elH.push(el); hIdx[nd.id] = i;
+  });
+}
+
+function cardHTML(nd){
+  return '<div class="card">' + artHTML(nd.art) +
+    '<div class="ttl">' + nd.title + '</div>' +
+    '<div class="tt">' + nd.time + '</div>' +
+    '<div class="one">' + nd.one + '</div></div>';
+}
+
+/* 懒渲染：临近视口才注入卡片内容（IntersectionObserver 为主 · 位置数学兜底） */
+function renderCard(nd, el){ if(!el.dataset.done){ el.insertAdjacentHTML('beforeend', cardHTML(nd)); el.dataset.done = '1'; } }
+var pendingU = [], pendingH = [];
+function setupIO(){
+  if(!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      var el = en.target, id = el.dataset.id, tr = el.dataset.track;
+      var nd = tr === 'u' ? UNIVERSE[uIdx[id]] : HUMAN[hIdx[id]];
+      renderCard(nd, el); io.unobserve(el);
+    });
+  }, {root: stage, rootMargin: '900px 0px'});
+  elU.concat(elH).forEach(function(el){ io.observe(el); });
+}
+function lazyByMath(){
+  var vw = stage.clientWidth, cx = -off + vw;
+  [ [pendingU, UNIVERSE, uIdx, elU], [pendingH, HUMAN, hIdx, elH] ].forEach(function(g){
+    for(var i = g[0].length - 1; i >= 0; i--){
+      var nd = g[0][i], x = (g[1] === UNIVERSE ? uX : hX)[nd.id];
+      if(x + 100 > cx - vw && x - 100 < cx + vw){
+        renderCard(nd, g[2] === uIdx ? elU[g[2][nd.id]] : elH[g[2][nd.id]]);
+        g[0].splice(i, 1);
+      }
+    }
+  });
+}
+
+/* 尺度刻度 */
+function drawRuler(){
+  var old = canvas.querySelectorAll('.tick'); old.forEach(function(t){ t.remove(); });
+  var marks;
+  if(mode === 'log'){
+    marks = [[1,'1 年'],[1e3,'1 千年'],[1e6,'100 万年'],[1e9,'10 亿年'],[1e12,'1 万亿年']];
+  }else{
+    marks = [[2.5e13,'25 万亿年'],[5e13,'50 万亿年'],[7.5e13,'75 万亿年']];
+  }
+  marks.forEach(function(mk){
+    var d = document.createElement('div');
+    d.className = 'tick tu'; d.style.left = (uFrac(mk[0], mode) * W) + 'px';
+    d.innerHTML = '<i></i>' + mk[1];
+    canvas.appendChild(d);
+  });
+  [[0,'出生'],[20,'20 岁'],[40,'40 岁'],[60,'60 岁'],[80,'80 岁']].forEach(function(mk){
+    var nd = HUMAN[ageNodeIndex(mk[0])];
+    var d = document.createElement('div');
+    d.className = 'tick th'; d.style.left = hX[nd.id] + 'px';
+    d.innerHTML = '<i></i>' + mk[1];
+    canvas.appendChild(d);
+  });
+}
+
+function placeAll(){
+  uX = layoutUniverse(mode);
+  hX = layoutHuman(uX['u-human']);
+  UNIVERSE.forEach(function(nd, i){ elU[i].style.left = uX[nd.id] + 'px'; });
+  HUMAN.forEach(function(nd, i){ elH[i].style.left = hX[nd.id] + 'px'; });
+  /* 交汇光柱（上轨人类出现 → 下轨相遇之前） */
+  var x1 = uX['u-human'], y1 = canvas.clientHeight * (document.body.classList.contains('short') ? 0.13 : 0.16);
+  var x2 = hX['h-sea'], y2 = canvas.clientHeight * (document.body.classList.contains('short') ? 0.87 : 0.84);
+  var ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  var len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  beam.style.left = x1 + 'px'; beam.style.height = len + 'px';
+  beam.style.transform = 'rotate(' + ang + 'deg)';
+  conv.style.left = ((x1 + x2) / 2) + 'px';
+  /* XYZ 光带：下轨 成年早期 → 初老（成年-中年段） */
+  var xa = hX['h-adult'], xb = hX['h-2nd'];
+  $('#xyzband').style.left = xa + 'px'; $('#xyzband').style.width = (xb - xa) + 'px';
+  $('#xyzlabel').style.left = ((xa + xb) / 2) + 'px';
+  /* 区域装饰带 */
+  $('#zone-sea').style.left = Math.max(uX['u-cam'], x2 - 2600) + 'px';
+  $('#zone-sea').style.width = Math.max(1200, x2 - Math.max(uX['u-cam'], x2 - 2600) - 40) + 'px';
+  $('#zone-degen').style.left = (uX['u-red'] + 900) + 'px';
+  $('#zone-degen').style.width = Math.max(900, uX['u-deg'] - uX['u-red'] - 1800) + 'px';
+  $('#zone-after').style.left = (hX['h-mem'] - 700) + 'px';
+  $('#zone-after').style.width = (W - hX['h-mem'] + 500) + 'px';
+  drawRuler();
+  pendingU = UNIVERSE.slice(); pendingH = HUMAN.slice();
+  lazyByMath();
+}
+
+/* ---------- 滑动物理（拖动 / 惯性 / 钳制橡皮筋） ---------- */
+var off = 0, vel = 0, dragging = false, lastX = 0, lastT = 0, moved = 0, downT = 0, rafOn = false;
+var snapFrom = 0, snapTo = 0, snapT0 = 0, snapDur = 0, snapping = false;
+
+function maxOff(){ return stage.clientWidth / 2; }
+function minOff(){ return stage.clientWidth / 2 - W; }
+function rubber(o){
+  if(o > maxOff()) return maxOff() + (o - maxOff()) * 0.32;
+  if(o < minOff()) return minOff() + (o - minOff()) * 0.32;
+  return o;
+}
+function applyOff(){ canvas.style.transform = 'translateX(' + off + 'px)'; }
+
+var nowU = null, nowH = null;
+function nearest(arr, xs, cx){
+  var best = null, bd = 1e18;
+  arr.forEach(function(nd){
+    var d = Math.abs(xs[nd.id] - cx);
+    if(d < bd){ bd = d; best = nd; }
+  });
+  return best;
+}
+function updateHUD(){
+  var vw = stage.clientWidth, cx = -off + vw / 2;
+  var nu = nearest(UNIVERSE, uX, cx), nh = nearest(HUMAN, hX, cx);
+  if(nu !== nowU){ nowU = nu; $('#now-u').innerHTML = '上轨 <b>' + nu.title + '</b> · ' + nu.time; }
+  if(nh !== nowH){ nowH = nh; $('#now-h').innerHTML = '下轨 <b>' + nh.title + '</b> · ' + nh.time; }
+  var p = (-off + vw / 2) / W;
+  $('#pfill').style.width = Math.max(0, Math.min(100, p * 100)) + '%';
+  var litX = (uX['u-human'] + hX['h-sea']) / 2;
+  beam.classList.toggle('lit', Math.abs(cx - litX) < vw * 0.22);
+}
+
+function tick(ts){
+  rafOn = false;
+  if(snapping){
+    var k = Math.min(1, (ts - snapT0) / snapDur);
+    var e = 1 - Math.pow(1 - k, 3);
+    off = snapFrom + (snapTo - snapFrom) * e;
+    if(k >= 1){ snapping = false; off = snapTo; vel = 0; }
+    applyOff(); updateHUD(); lazyByMath();
+    return;
+  }
+  if(dragging){ return; }
+  if(Math.abs(vel) > 0.02){
+    off += vel * 16.7;
+    vel *= 0.945;
+    if(off > maxOff()){ off = maxOff(); vel = 0; }
+    if(off < minOff()){ off = minOff(); vel = 0; }
+    applyOff(); updateHUD(); lazyByMath();
+    rafOn = true; requestAnimationFrame(tick);
+  }
+}
+function wake(){ if(!rafOn){ rafOn = true; requestAnimationFrame(tick); } }
+
+stage.addEventListener('pointerdown', function(e){
+  snapping = false; vel = 0;
+  dragging = true; moved = 0; downT = Date.now();
+  lastX = e.clientX; lastT = performance.now();
+  stage.classList.add('grabbing');
+  stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove', function(e){
+  if(!dragging) return;
+  var now = performance.now();
+  var dx = e.clientX - lastX, dt = Math.max(1, now - lastT);
+  moved += Math.abs(dx);
+  off = rubber(off + dx);
+  if(dt > 2 && dt < 90) vel = -dx / dt * 0.9;
+  lastX = e.clientX; lastT = now;
+  applyOff(); updateHUD(); lazyByMath();
+});
+var suppressClick = false;
+function endDrag(){
+  if(!dragging) return;
+  dragging = false; stage.classList.remove('grabbing');
+  if(moved >= 7) suppressClick = true;   /* 拖动后吞掉随之而来的 click */
+  if(off > maxOff() || off < minOff()){ slideTo(clampOff(off, stage.clientWidth)); return; }
+  if(!REDUCE && Math.abs(vel) > 0.4) wake();
+  else { vel = 0; updateHUD(); }
+}
+stage.addEventListener('pointerup', endDrag);
+stage.addEventListener('pointercancel', endDrag);
+
+stage.addEventListener('wheel', function(e){
+  e.preventDefault();
+  snapping = false;
+  var d = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * 1.15;
+  if(e.deltaMode === 1) d *= 16;
+  off = rubber(off - d);
+  applyOff(); updateHUD(); lazyByMath();
+  $('#hint').classList.add('off');
+}, {passive: false});
+
+window.addEventListener('keydown', function(e){
+  var tag = e.target && e.target.tagName;
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+  if(document.querySelector('.modal.open')) return;
+  var step = e.shiftKey ? 900 : 280;
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ slideTo(off + step); e.preventDefault(); }
+  else if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ slideTo(off - step); e.preventDefault(); }
+  else if(e.key === 'Home'){ slideTo(maxOff()); e.preventDefault(); }
+  else if(e.key === 'End'){ slideTo(minOff()); e.preventDefault(); }
+});
+
+function slideTo(target){
+  target = clampOff(target, stage.clientWidth);
+  if(REDUCE){ off = target; applyOff(); updateHUD(); lazyByMath(); return; }
+  snapping = true; snapFrom = off; snapTo = target; snapT0 = performance.now();
+  snapDur = Math.min(900, Math.max(220, Math.abs(target - off) * 0.55));
+  wake();
+}
+function centerOn(x){ slideTo(stage.clientWidth / 2 - x); }
+
+/* ---------- 底部导航 ---------- */
+var ptrack = $('#ptrack'), pfillEl = $('#pfill');
+function addTick(nd, isHuman){
+  var b = document.createElement('button');
+  b.className = 'pt' + (isHuman ? ' human' : '');
+  b.type = 'button'; b.title = (isHuman ? '下轨 · ' : '上轨 · ') + nd.title + '（' + nd.time + '）';
+  b.setAttribute('aria-label', b.title);
+  b.style.left = ((isHuman ? hX : uX)[nd.id] / W * 100) + '%';
+  b.addEventListener('click', function(ev){ ev.stopPropagation(); centerOn((isHuman ? hX : uX)[nd.id]); flashNode(nd.id); });
+  ptrack.appendChild(b);
+}
+function buildTicks(){
+  ptrack.querySelectorAll('.pt').forEach(function(b){ b.remove(); });
+  ['u-bang','u-light','u-star','u-sun','u-life','u-cam','u-dino','u-human','u-xyz','u-f100','u-red','u-deg']
+    .forEach(function(id){ addTick(UNIVERSE[uIdx[id]], false); });
+  ['h-sea','h-birth','h-play','h-teen','h-build','h-mid2','h-2nd','h-end','h-star']
+    .forEach(function(id){ addTick(HUMAN[hIdx[id]], true); });
+}
+ptrack.addEventListener('click', function(e){
+  if(e.target.closest('.pt')) return;
+  var r = ptrack.getBoundingClientRect();
+  var f = (e.clientX - r.left) / r.width;
+  centerOn(f * W);
+});
+$('#j-start').addEventListener('click', function(){ slideTo(maxOff()); });
+$('#j-end').addEventListener('click', function(){ slideTo(minOff()); });
+$('#j-now').addEventListener('click', function(){ centerOn(hX['h-mid2']); flashNode('h-mid2'); });
+
+var flashTimer = null;
+function flashNode(id){
+  var i = uIdx[id] != null ? uIdx[id] : null, j = hIdx[id] != null ? hIdx[id] : null;
+  var el = i != null ? elU[i] : (j != null ? elH[j] : null);
+  if(!el) return;
+  renderCard(i != null ? UNIVERSE[i] : HUMAN[j], el);
+  el.classList.add('focused');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(function(){ el.classList.remove('focused'); }, 2600);
+}
+
+/* ---------- 尺度切换（对数 ⇄ 线性） ---------- */
+var scaleBtn = $('#btn-scale');
+scaleBtn.addEventListener('click', function(){
+  mode = mode === 'log' ? 'linear' : 'log';
+  scaleBtn.textContent = '尺度 · ' + (mode === 'log' ? '对数' : '线性');
+  scaleBtn.setAttribute('aria-label', '当前' + (mode === 'log' ? '对数' : '线性') + '尺度，点击切换');
+  canvas.classList.add('anim');
+  placeAll(); buildTicks(); updateHUD();
+  setTimeout(function(){ canvas.classList.remove('anim'); }, REDUCE ? 0 : 700);
+});
+
+/* ---------- 节点弹卡 ---------- */
+var nm = $('#node-modal'), nmLastFocus = null;
+function openNode(id){
+  var i = uIdx[id] != null ? uIdx[id] : null;
+  var j = (i == null && hIdx[id] != null) ? hIdx[id] : null;
+  if(i == null && j == null) return;
+  var nd = i != null ? UNIVERSE[i] : HUMAN[j];
+  renderCard(nd, i != null ? elU[i] : elH[j]);
+  $('#nm-art').innerHTML = artHTML(nd.art);
+  var badges = '';
+  if(nd.flag === 'you') badges += ' <span class="badge you">你在这</span>';
+  if(nd.flag === 'xyz') badges += ' <span class="badge xyz">XYZ 标记</span>';
+  if(nd.tag === 'candidate') badges += ' <span class="badge cand">CANDIDATE · 未来推测</span>';
+  if(nd.tag === 'model') badges += ' <span class="badge model">MODEL · 模型推演</span>';
+  $('#nm-title').innerHTML = nd.title + badges;
+  $('#nm-time').textContent = (i != null ? '上轨 · 宇宙的一生 · ' : '下轨 · 一个人的一生 · ') + nd.time;
+  $('#nm-story').textContent = nd.story;
+  $('#nm-links').innerHTML = '<a class="mlink" href="' + nd.link.href + '">' + nd.link.label + '</a>' +
+    '<a class="mlink ghost" href="' + MAIN + '">打开主书</a>';
+  var tip = $('#nm-tip');
+  if(nd.tip){ tip.hidden = false; tip.innerHTML = nd.tip + ' <a href="' + MAIN + '#v21" style="color:var(--link)">《健康律定稿》</a>'; }
+  else if(nd.tagNote){ tip.hidden = false; tip.innerHTML = '<b>诚实标注</b>：' + nd.tagNote; }
+  else tip.hidden = true;
+  nmLastFocus = document.activeElement;
+  nm.classList.add('open');
+  $('#nm-close').focus();
+}
+function closeNode(){ nm.classList.remove('open'); if(nmLastFocus) nmLastFocus.focus(); }
+$('#nm-close').addEventListener('click', closeNode);
+nm.addEventListener('click', function(e){ if(e.target === nm) closeNode(); });
+canvas.addEventListener('click', function(e){
+  if(suppressClick){ suppressClick = false; return; }
+  var nd = e.target.closest('.node');
+  if(nd) openNode(nd.dataset.id);
+});
+canvas.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  var nd = e.target.closest('.node');
+  if(nd){ e.preventDefault(); openNode(nd.dataset.id); }
+});
+
+/* ---------- 帮助 ---------- */
+var hm = $('#help-modal');
+$('#btn-help').addEventListener('click', function(){ hm.classList.add('open'); $('#help-close').focus(); });
+$('#help-close').addEventListener('click', function(){ hm.classList.remove('open'); });
+hm.addEventListener('click', function(e){ if(e.target === hm) hm.classList.remove('open'); });
+
+/* ---------- 年龄选择器 + 三章推荐 ---------- */
+var am = $('#age-modal'), rm = $('#rec-modal');
+var ageRange = $('#age-range'), ageNum = $('#age-num'), ageBig = $('#age-big');
+[7,12,18,30,45,60,75,90].forEach(function(a){
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip'; b.textContent = a + ' 岁';
+  b.addEventListener('click', function(){ setAge(a); });
+  $('#age-chips').appendChild(b);
+});
+function setAge(a){
+  a = Math.max(0, Math.min(100, Math.round(a || 0)));
+  ageRange.value = a; ageNum.value = a;
+  ageBig.innerHTML = a + '<small> 岁</small>';
+}
+ageRange.addEventListener('input', function(){ setAge(+ageRange.value); });
+ageNum.addEventListener('input', function(){ setAge(+ageNum.value); });
+function applyAge(){
+  var a = Math.max(0, Math.min(100, Math.round(+ageRange.value || 0)));
+  var idx = ageNodeIndex(a), nd = HUMAN[idx];
+  am.classList.remove('open');
+  centerOn(hX[nd.id]); flashNode(nd.id);
+  var rec = recFor(a);
+  var body = '<p class="mt" style="text-align:center">' + a + ' 岁 · 你在「' + nd.title + '」段（' + nd.time + '）</p>';
+  rec.items.forEach(function(it, i){
+    body += '<div class="rec"><span class="no">' + (i + 1) + '</span><div>' +
+      '<a href="' + it.href + '">' + it.t + '</a><div class="why">' + it.why + '</div></div></div>';
+  });
+  $('#rec-body').innerHTML = body;
+  setTimeout(function(){ rm.classList.add('open'); $('#rec-ok').focus(); }, REDUCE ? 0 : 650);
+}
+$('#btn-age-go').addEventListener('click', applyAge);
+$('#btn-age-skip').addEventListener('click', function(){ am.classList.remove('open'); $('#hint').classList.remove('off'); });
+$('#btn-age').addEventListener('click', function(){ setAge(ageRange.value); am.classList.add('open'); ageRange.focus(); });
+$('#rec-ok').addEventListener('click', function(){ rm.classList.remove('open'); });
+$('#rec-close').addEventListener('click', function(){ rm.classList.remove('open'); });
+rm.addEventListener('click', function(e){ if(e.target === rm) rm.classList.remove('open'); });
+
+/* ---------- 朗读当前节点（两句话） ---------- */
+var synth = window.speechSynthesis, ttsBtn = $('#btn-tts'), voice = null;
+function pickVoice(){
+  if(!synth) return null;
+  var vs = synth.getVoices();
+  if(!vs || !vs.length) return null;
+  var zh = vs.filter(function(v){ return /^zh/i.test(v.lang || ''); });
+  return zh.filter(function(v){ return /zh[-_]cn/i.test(v.lang); })[0] || zh[0] || null;
+}
+if(synth && 'SpeechSynthesisUtterance' in window){
+  voice = pickVoice();
+  try{ synth.onvoiceschanged = function(){ voice = pickVoice(); }; }catch(e){}
+  setTimeout(function(){ voice = pickVoice(); }, 600);
+}else{
+  ttsBtn.hidden = true;
+}
+ttsBtn.addEventListener('click', function(){
+  if(!synth) return;
+  if(synth.speaking){ try{ synth.cancel(); }catch(e){} return; }
+  if(!nowU) updateHUD();
+  var text = '上轨，' + nowU.title + '。' + nowU.one + '。 下轨，' + nowH.title + '。' + nowH.one + '。';
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-CN'; if(voice) u.voice = voice; u.rate = 1;
+  try{ synth.cancel(); synth.speak(u); }catch(e){}
+});
+document.addEventListener('visibilitychange', function(){ if(document.hidden && synth){ try{ synth.cancel(); }catch(e){} } });
+
+/* ---------- Esc 统一关模态 ---------- */
+window.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape') return;
+  var open = document.querySelector('.modal.open');
+  if(open){ open.classList.remove('open'); if(nmLastFocus && open === nm){ nmLastFocus.focus(); nmLastFocus = null; } }
+});
+
+/* ---------- 启动 ---------- */
+function fitShort(){ document.body.classList.toggle('short', window.innerHeight < 660); }
+window.addEventListener('resize', function(){ fitShort(); placeAll(); buildTicks(); updateHUD(); });
+fitShort();
+buildNodes();
+placeAll();
+setupIO();
+buildTicks();
+var vw0 = stage.clientWidth;
+off = clampOff(vw0 / 2 - (hX['h-sea'] - vw0 * 0.35), vw0);   /* 开卷：停在交汇（人类出现⇄相遇之前）左侧 */
+applyOff(); updateHUD();
+setTimeout(function(){ $('#hint').classList.add('off'); }, 7000);
+})();
+</script>
+</body>
+</html>

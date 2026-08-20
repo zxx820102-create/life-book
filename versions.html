@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="description" content="《生命之书》版本树——从 v0.9 到 v3.0 的生长树，与末梢渐淡的未来枝。这棵树就是书的发育史。">
+<title>生命之书 · 版本树</title>
+<style>
+  /* ==========================================================
+     《生命之书·版本树》v4.0-wip —— 与主书同族的设计系统
+     白昼之书 × 星空之书 · 复用主书 v1 设计 token · 单文件自包含
+     ========================================================== */
+  :root{
+    --paper:#FAF6EF; --layer1:#F3ECDF; --layer2:#EBE1CF; --layer3:#E2D5BD;
+    --ink:#2A2622; --ink2:#6B6154; --ink3:#4A443C;
+    --cinnabar:#B3452C; --cinnabar-deep:#9A3A24;
+    --success:#3E7A52; --success-deep:#2C5C3E;
+    --warning:#9A6B1F; --warning-deep:#8A5F1A;
+    --flag:#A03028; --link:#8C4510; --selbg:#F5E7CE;
+    --border:#D9CDB9; --border-strong:#99855F; --disabled:#A69C8B;
+    --p3:#3E7A52; --p5:#4A3F7A; --p7:#7A5A2E;
+    --bg:var(--paper); --text:var(--ink); --text-2:var(--ink2); --text-3:var(--ink3);
+    --accent:var(--cinnabar); --accent-deep:var(--cinnabar-deep); --accent-line:var(--warning);
+    --btn-bg:var(--layer1); --panel-bg:var(--layer1);
+    --wood:#8A6B4A; --wood-2:#6E543A; --leaf:#5E8A5A;
+    --font-data:Georgia,'Times New Roman',serif;
+    --ease-enter:cubic-bezier(.16,1,.3,1); --ease-hover:cubic-bezier(.4,0,.2,1);
+    --dur-small:120ms; --dur-medium:300ms; --tap:44px; --measure:760px;
+  }
+  body.night{
+    --space:#0B1220; --layer1:#111A2B; --layer2:#182338; --layer3:#1F2D47;
+    --star:#E8E4D8; --star2:#9FA093; --gold:#D4A94E; --gold-dim:#B8933F;
+    --success:#8CC29A; --warning:#E0B458; --flag:#E07B5A; --link:#9EC1E8; --selbg:#24354F;
+    --border:#2B3A54; --border-strong:#55698F; --disabled:#4E5B72;
+    --p3:#7FA98C; --p5:#8D82C9; --p7:#D4B36A;
+    --bg:var(--space); --text:var(--star); --text-2:var(--star2); --text-3:var(--star);
+    --accent:var(--gold); --accent-deep:var(--gold-dim); --accent-line:var(--gold);
+    --btn-bg:var(--layer1); --panel-bg:var(--layer1);
+    --wood:#8F7450; --wood-2:#6B573C; --leaf:#7FA98C;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:Georgia,'Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong','SimSun',serif;
+    font-size:18px;line-height:32px;letter-spacing:.01em;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--selbg)}
+  :focus-visible{outline:2px solid var(--border-strong);outline-offset:2px}
+  a{color:var(--link)}
+  a:hover{color:var(--accent-deep)}
+
+  /* ---------- 吸顶导航（同族） ---------- */
+  #toc{position:sticky;top:0;z-index:50;display:flex;align-items:center;
+    background:color-mix(in srgb,var(--bg) 96%,transparent);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  #toc .bar{flex:1 1 auto;min-width:0;max-width:980px;margin:0 auto;display:flex;align-items:center;gap:2px;
+    overflow-x:auto;padding:6px 16px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  #toc .bar::-webkit-scrollbar{height:4px}
+  #toc .bar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  #toc .brand{flex:0 0 auto;font-weight:700;color:var(--accent);font-size:14px;margin-right:12px;letter-spacing:.1em;white-space:nowrap}
+  #toc a{flex:0 0 auto;white-space:nowrap;font-size:13px;line-height:20px;min-height:44px;
+    display:flex;align-items:center;color:var(--text-2);text-decoration:none;padding:0 14px;border-radius:999px}
+  #toc a:hover{color:var(--accent-deep);background:var(--layer1)}
+  #toc .tools{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:0 16px;border-left:1px solid var(--border)}
+  #night-btn{width:var(--tap);height:var(--tap);border-radius:50%;border:1px solid var(--border-strong);
+    background:var(--btn-bg);cursor:pointer;font-size:17px;line-height:1;padding:0;color:var(--accent);
+    transition:transform var(--dur-small) var(--ease-hover)}
+  #night-btn:hover{transform:translateY(-1px)}
+  #night-btn:active{transform:scale(.96)}
+
+  /* ---------- 封面（同族） ---------- */
+  .cover{max-width:1020px;margin:0 auto;padding:80px 24px 40px;text-align:center;background:
+    radial-gradient(1100px 500px at 50% -8%, var(--layer1) 0%, rgba(243,236,223,0) 60%),
+    radial-gradient(900px 600px at 85% 110%, var(--layer2) 0%, rgba(235,225,207,0) 55%),
+    var(--bg)}
+  body.night .cover{background:
+    radial-gradient(1100px 500px at 50% -8%, var(--layer1) 0%, rgba(17,26,43,0) 60%),
+    radial-gradient(900px 600px at 85% 110%, var(--layer2) 0%, rgba(11,18,32,0) 55%),
+    var(--bg)}
+  .cover .ornament{color:var(--accent-line);font-size:22px;letter-spacing:1.2em;margin-left:1.2em;margin-bottom:28px}
+  .cover h1{font-size:clamp(34px,6.5vw,52px);line-height:1.2;margin:0 0 14px;letter-spacing:.22em;text-indent:.22em;
+    font-weight:700;color:var(--text)}
+  .cover .subtitle{font-size:clamp(15px,3vw,19px);color:var(--accent-deep);letter-spacing:.14em;margin-bottom:36px}
+  .cover .rule{width:64px;height:1px;background:var(--accent-line);margin:0 auto 32px}
+  .cover .mission{max-width:34em;font-size:clamp(15px,3vw,18px);color:var(--text-2);line-height:2.1;margin:0 auto}
+  .cover .seal{margin-top:44px;font-size:12px;color:var(--text-3);letter-spacing:.28em;line-height:2.2}
+
+  /* ---------- 版本树舞台 ---------- */
+  .stage{max-width:1020px;margin:8px auto 0;padding:0 16px}
+  #tree-svg{width:100%;height:auto;display:block}
+  #tree-svg .ground{stroke:var(--border-strong);stroke-width:1.5}
+  #tree-svg .soil{fill:var(--layer2);opacity:.45}
+  .trunk{fill:none;stroke:var(--wood);stroke-width:10;stroke-linecap:round}
+  .trunk2{fill:none;stroke:var(--wood-2);stroke-width:3;stroke-linecap:round;opacity:.5}
+  .twig{fill:none;stroke:var(--wood);stroke-width:3.5;stroke-linecap:round}
+  .root{fill:none;stroke:var(--wood-2);stroke-width:3;stroke-linecap:round;opacity:.75}
+  .future-twig{fill:none;stroke:var(--wood);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:3 6}
+  .lf{fill:var(--leaf);stroke:var(--wood-2);stroke-width:1;cursor:pointer;
+    transition:filter var(--dur-small) var(--ease-hover)}
+  .node{cursor:pointer}
+  .node text{font-family:Georgia,'Source Han Serif SC','Noto Serif CJK SC','Songti SC',serif;
+    fill:var(--text);user-select:none;pointer-events:none}
+  .node .vno{font-size:17px;font-weight:700;fill:var(--accent-deep)}
+  .node .vdate{font-size:10.5px;fill:var(--text-2);font-family:var(--font-data)}
+  .node .vline{font-size:11.5px;fill:var(--text-2);letter-spacing:.02em}
+  .node.future .vno{fill:var(--text-2)}
+  .node.future .vline{fill:var(--text-2)}
+  .node.rootn .vno{font-size:13px}
+  .node.rootn .vline{font-size:10.5px}
+  .node:hover .lf{filter:brightness(1.12) drop-shadow(0 2px 4px rgba(42,38,34,.3))}
+  .node.sel .lf{stroke:var(--accent);stroke-width:2.5;filter:drop-shadow(0 3px 8px rgba(42,38,34,.35))}
+  .node:focus-visible{outline:none}
+  .node:focus-visible .lf{stroke:var(--accent);stroke-width:2.5}
+  .vein{stroke:var(--wood-2);stroke-width:.8;opacity:.6;fill:none;pointer-events:none}
+  .crown-star{fill:var(--accent-line);pointer-events:none}
+
+  /* 生长动画（prefers-reduced-motion 时禁用·直接呈现） */
+  .grow{opacity:0}
+  .anim .grow{animation:fadein .7s var(--ease-enter) forwards}
+  .anim .node{opacity:0;animation:leafin .6s var(--ease-enter) forwards}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  @keyframes leafin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){
+    .grow,.anim .grow,.anim .node{animation:none!important;opacity:1!important;transform:none!important}
+  }
+
+  /* ---------- 图例 ---------- */
+  .legend{max-width:760px;margin:18px auto 0;padding:0 24px;display:flex;gap:18px;flex-wrap:wrap;
+    font-size:12.5px;line-height:20px;color:var(--text-2);justify-content:center}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .lg-solid{display:inline-block;width:22px;height:0;border-top:3.5px solid var(--wood);border-radius:2px}
+  .lg-dash{display:inline-block;width:22px;height:0;border-top:2.5px dashed var(--wood);border-radius:2px;opacity:.6}
+  .lg-leaf{display:inline-block;width:12px;height:9px;border-radius:60% 4px 60% 4px;background:var(--leaf);
+    transform:rotate(45deg) scale(.9);border:1px solid var(--wood-2)}
+
+  /* ---------- 叶片故事面板 ---------- */
+  main{max-width:var(--measure);margin:0 auto;padding:8px 24px 24px}
+  #story{border:1px solid var(--border-strong);border-radius:16px;background:var(--panel-bg);
+    padding:28px 28px 24px;margin:24px 0;box-shadow:0 8px 30px rgba(42,38,34,.10)}
+  body.night #story{box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  #story .s-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  #story .s-v{font-size:26px;line-height:34px;font-weight:700;color:var(--accent-deep)}
+  #story .s-name{font-size:17px;line-height:28px;color:var(--text)}
+  #story .s-date{font-size:12.5px;color:var(--text-2);font-family:var(--font-data)}
+  #story .s-state{display:inline-block;font-size:11.5px;line-height:18px;letter-spacing:.08em;
+    border-radius:8px;padding:2px 10px;margin:2px 0 12px}
+  .st-past{color:var(--success-deep);border:1px solid var(--success)}body.night .st-past{color:var(--success)}
+  .st-now{color:var(--bg);background:var(--accent);border:1px solid var(--accent)}
+  body.night .st-now{color:#0B1220}
+  .st-future{color:var(--text-2);border:1px dashed var(--border-strong)}
+  #story .s-text{font-size:16px;line-height:29px;margin:6px 0 12px}
+  #story .s-cond{font-size:13.5px;line-height:23px;color:var(--text-2);border-top:1px dashed var(--border);
+    padding-top:12px;margin-top:4px}
+  #story .s-link{font-size:14px}
+
+  /* ---------- 谱系规律 ---------- */
+  section.chapter{margin:8px 0 64px}
+  .ch-no{display:inline-block;font-size:13px;letter-spacing:.3em;color:var(--accent-deep);
+    border:1px solid var(--border-strong);border-radius:999px;padding:2px 14px 2px 17px;margin-bottom:14px}
+  h2{font-size:clamp(23px,4.5vw,30px);line-height:1.4;margin:0 0 20px;letter-spacing:.04em}
+  p{margin:0 0 16px}
+  .note{font-size:13.5px;line-height:22px;color:var(--text-2)}
+  .sep{text-align:center;color:var(--accent-line);letter-spacing:1.2em;margin-left:1.2em;font-size:15px}
+  blockquote{margin:24px 0;padding:16px 22px;border-left:3px solid var(--accent-line);
+    background:var(--layer2);border-radius:0 12px 12px 0}
+  blockquote p{margin:0;font-size:17px;line-height:30px}
+
+  /* ---------- 无 JS 兜底 ---------- */
+  .nojs{border:1px dashed var(--border-strong);border-radius:12px;background:var(--layer1);
+    padding:18px 22px;margin:16px 0;font-size:15px;line-height:26px}
+  .nojs ol{margin:8px 0;padding-left:22px}
+
+  footer.page{border-top:1px solid var(--border);margin-top:56px;padding:32px 24px 48px;text-align:center;
+    font-size:12px;line-height:22px;color:var(--text-3);letter-spacing:.02em}
+  footer.page a{color:var(--link)}
+  @media print{#toc,#night-btn,.legend{display:none!important}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+
+<nav id="toc" aria-label="版本树·地图">
+  <div class="bar">
+    <span class="brand">《生命之书·版本树》</span>
+    <a href="#tree">生长树</a>
+    <a href="#story">这一叶的故事</a>
+    <a href="#law">谱系的规律</a>
+    <a href="./life-book-public-v4.0-wip.html">← 回到主书</a>
+    <a href="./contribute.html">共同写作</a>
+  </div>
+  <div class="tools">
+    <button id="night-btn" aria-label="让天黑下来" aria-pressed="false" title="让天黑下来">🌙</button>
+  </div>
+</nav>
+
+<header class="cover">
+  <div class="ornament">❖ ❖ ❖</div>
+  <h1>版本树</h1>
+  <div class="subtitle">—— 生命之书 · 这棵树就是书的发育史 ——</div>
+  <div class="rule"></div>
+  <p class="mission">年轮不撒谎：每一版都长在上一版上，<br>不推翻，只长出下一个器官。<br>点任何一片叶，读那一年的故事。</p>
+  <div class="seal">XYZ 星际疗愈工程 · 2026<br>v4.0-wip · 共创层奠基</div>
+</header>
+
+<div class="stage" id="tree">
+  <svg id="tree-svg" viewBox="0 0 920 860" role="group" aria-label="生命之书版本生长树：从 v0.9 到 v3.0 的实线枝叶，与 v4.0 到 v10.0 渐淡的未来枝。每片叶可点击查看该版故事。">
+    <desc>这是一棵从下往上生长的树：树根是成书之前的内部版本（v1/v2 增补/v2.1/专章），树干上的叶片是公开发行版 v0.9→v3.0，树冠顶端渐淡的虚枝是推演中的未来版本 v4.0→v10.0。</desc>
+    <g id="g-static"></g>
+    <g id="g-nodes"></g>
+  </svg>
+</div>
+
+<div class="legend" aria-hidden="true">
+  <span><i class="lg-leaf"></i>实线叶 = 已发生（历史不可原地改写）</span>
+  <span><i class="lg-dash"></i>虚枝 = 未来推演（置信度递减·取自终局推演书）</span>
+  <span>点叶 = 读这一版的故事</span>
+</div>
+
+<noscript>
+  <main>
+    <div class="nojs">
+      <strong>版本树文字版</strong>（本页动效与交互需要 JavaScript，以下为完整内容）：
+      <ol>
+        <li><strong>v1</strong>（2026-08-19·根）：十三章正文+数据底座成书。</li>
+        <li><strong>v2 增补</strong>（2026-08-20·根）：152 医系增补卷；第六件事"记"。</li>
+        <li><strong>v2.1</strong>（2026-08-20·根）：外部独立审计后健康律定稿为六个动词；收编 45 岁体检报告。</li>
+        <li><strong>专章</strong>（2026-08-20·根）：五官与微解剖专章成稿，收录为第 2.5 / 9.5 章。</li>
+        <li><strong>v0.9</strong>（2026-08-19）：首次公开发行——新撰全年龄卷+全景图互动章，首次打包为单文件网页。</li>
+        <li><strong>v0.9.1</strong>（2026-08-20）：英文版上线；语言条款删除——一本书不该规定读它的人说什么语言。</li>
+        <li><strong>v1.0</strong>（2026-08-20）：收录卷三万物有灵+卷六数字时代；夜读模式+书之弧——邻居与夜晚都该被这本书照亮。</li>
+        <li><strong>v1.5</strong>（2026-08-20）：设计系统 v1（双主题 31 色 token）；新增卷二人与人+卷四地球。</li>
+        <li><strong>v2.0</strong>（2026-08-20）：七部齐全——卷五星空+卷七时间之河；前沿注入 23 条；终部合一；朗读器。</li>
+        <li><strong>v2.5</strong>（2026-08-20）：心跳反馈回路——每章三颗心，书开始听见读者。</li>
+        <li><strong>v3.0</strong>（2026-08-20）：活书器官定版——伴读+个性化+心跳三线合流，书开始回应。</li>
+        <li><strong>v4.0</strong>（未来·奠基中）：世代书——作者从"我们"变"所有人"（读者共创·版本树公开）。</li>
+        <li><strong>v5.0</strong>（未来）：感知书——接入数据流：新研究自动入册，全人类疑问聚合显影。</li>
+        <li><strong>v6.0</strong>（未来）：对话书——每章可被质疑与答辩：反驳→证据裁决→章改。</li>
+        <li><strong>v7.0</strong>（未来）：万物书——知识本体化：跨语言全谱+机器可执行版+给 AI 读的版本。</li>
+        <li><strong>v8.0</strong>（未来）：教育书——成为全球生命教育的默认底层（像识字课本的位置）。</li>
+        <li><strong>v9.0</strong>（未来）：文明书——成为文明知识基础设施的一部分（文字/印刷/互联网的同列）。</li>
+        <li><strong>v10.0</strong>（未来）：传承书——跨代际记忆装置：每代人的认识结晶不挥发地传给下一代。</li>
+      </ol>
+    </div>
+  </main>
+</noscript>
+
+<main>
+<section class="chapter" id="story-sec" aria-label="叶片故事">
+  <div id="story" aria-live="polite">
+    <div class="s-head">
+      <span class="s-v" id="s-v">v4.0</span>
+      <span class="s-name" id="s-name">世代书</span>
+      <span class="s-date" id="s-date">未来 · 奠基中</span>
+    </div>
+    <span class="s-state st-now" id="s-state">进行中 · 你正在参与</span>
+    <p class="s-text" id="s-text"></p>
+    <p class="s-cond" id="s-cond"></p>
+  </div>
+
+  <div class="sep">❖ ❖ ❖</div>
+
+  <section class="chapter" id="law">
+    <div class="ch-no">谱系的规律</div>
+    <h2>每一步都不推翻上一步，只长出下一个器官</h2>
+    <blockquote><p>书的定义逐版扩张——文本 → 响应体 → 社区 → 感官 → 辩论场 → 本体 → 课本 → 基础设施 → 记忆器官。<br>这就是"丝滑"：无跳变，每一版是上一版的自然成熟。</p></blockquote>
+    <p class="note">过去各枝蒸馏自主书版本记录（v3.0 书末·版本史）；未来各枝取自《终局推演书》§1 版本谱系（2026-08-20），其认识纪律：工程外推（高）→ 趋势推演（中）→ 文明推演（低）→ 宇宙推演（METAPHOR），置信度逐档递减且全部显式标注——所以它们画成虚枝，且越远越淡。</p>
+    <p class="note">按书的宪法：终态不是静态全知，而是永远保留下一次合法纠正的稳定生成过程。这棵树永远为下一片叶留着位置——<a href="./contribute.html">包括你将参与的那一片（共同写作）</a>。</p>
+  </section>
+</section>
+</main>
+
+<footer class="page">
+  《生命之书 · 版本树》· v4.0-wip 共创层奠基 · 2026<br>
+  XYZ 星际疗愈工程 · 与每一个愿意认真对待生命知识的人<br>
+  <a href="./life-book-public-v4.0-wip.html">← 回到主书</a> · <a href="./contribute.html">共同写作</a> · <a href="#tree">回到树梢</a><br>
+  健康科普 · 不替代医疗诊断 · 红旗症状请就医
+</footer>
+
+<script>
+/* ============================================================
+   versions.html · v4.0-wip 版本树
+   1) 夜读切换（与主书同款 localStorage 键，跨页同步）
+   2) 由 NODES 数据生成 SVG 生长树（干/枝/叶/根/未来虚枝）
+   3) 点叶/键盘选叶 → 故事面板；枝干描边生长动画（reduced-motion 降级）
+   ============================================================ */
+(function(){
+  'use strict';
+
+  /* ---- 夜读切换 ---- */
+  var nightBtn = document.getElementById('night-btn');
+  function applyNight(on){
+    document.body.classList.toggle('night', on);
+    if(nightBtn){ nightBtn.textContent = on ? '☀️' : '🌙'; nightBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      nightBtn.setAttribute('aria-label', on ? '让天亮回来' : '让天黑下来');
+      nightBtn.title = on ? '让天亮回来' : '让天黑下来'; }
+  }
+  var saved = null;
+  try{ saved = localStorage.getItem('lb-theme'); }catch(e){}
+  var mql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  applyNight(saved === 'night' ? true : saved === 'light' ? false : !!(mql && mql.matches));
+  if(nightBtn){
+    nightBtn.addEventListener('click', function(){
+      var on = !document.body.classList.contains('night');
+      applyNight(on);
+      try{ localStorage.setItem('lb-theme', on ? 'night' : 'light'); }catch(e){}
+    });
+  }
+
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent){
+    var e = document.createElementNS(SVGNS, name);
+    if(attrs){ for(var k in attrs){ if(attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); } }
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+
+  /* ---- 版本数据（日期/一行理由/故事·蒸馏自主书版本史与终局推演书§1） ---- */
+  var TRUNK = 'M460,640 C456,566 468,506 460,438 C452,362 462,316 460,262 C459,234 460,218 460,222';
+  var GROUND_Y = 640;
+
+  var BRANCHES = [
+    { id:'v0-9',   d:'M460,596 Q566,588 646,542' },
+    { id:'v0-9-1', d:'M460,544 Q356,536 276,492' },
+    { id:'v1-0',   d:'M460,490 Q568,480 652,432' },
+    { id:'v1-5',   d:'M460,434 Q352,424 270,372' },
+    { id:'v2-0',   d:'M460,376 Q572,364 654,314' },
+    { id:'v2-5',   d:'M460,318 Q358,308 284,258' }
+  ];
+
+  var ROOTS = [
+    { id:'v1i',    d:'M460,644 Q376,694 296,718', lx:296, ly:718, anchor:'middle' },
+    { id:'v2z',    d:'M460,644 Q428,700 408,748', lx:408, ly:748, anchor:'middle' },
+    { id:'v2-1i',  d:'M460,644 Q492,700 512,748', lx:512, ly:748, anchor:'middle' },
+    { id:'zhuan',  d:'M460,644 Q544,694 624,718', lx:624, ly:718, anchor:'middle' }
+  ];
+
+  var FUTURES = [
+    { id:'v4-0',  d:'M460,224 L460,158',                                  lx:460, ly:158, anchor:'end',    op:.9  },
+    { id:'v5-0',  d:'M460,224 Q404,172 386,110',                          lx:386, ly:110, anchor:'end',    op:.7  },
+    { id:'v6-0',  d:'M460,224 Q516,172 534,110',                          lx:534, ly:110, anchor:'start',  op:.7  },
+    { id:'v7-0',  d:'M442,196 Q352,144 322,74',                           lx:322, ly:74,  anchor:'end',    op:.52 },
+    { id:'v8-0',  d:'M478,196 Q568,144 598,74',                           lx:598, ly:74,  anchor:'start',  op:.52 },
+    { id:'v9-0',  d:'M420,184 Q292,130 240,52',                           lx:240, ly:36,  anchor:'end',    op:.38 },
+    { id:'v10-0', d:'M500,184 Q628,130 680,52',                           lx:680, ly:36,  anchor:'start',  op:.38 }
+  ];
+
+  /* v=版本号 name=版名 date=日期 lines=叶上短句 state=past|now|future story=面板故事 cond=过渡条件 */
+  var NODES = [
+    { id:'v1i',   v:'v1', name:'底座', date:'2026-08-19', kind:'root', state:'past',
+      lines:['十三章+数据底座'],
+      story:'十三章正文+数据底座成书。序章立下全书最重要的画面："你的身体是一座城市，住着约 30 万亿个细胞市民。"整棵树从这一点向下扎根。',
+      cond:'根，不见光，但所有枝叶都靠它喝水。' },
+    { id:'v2z',   v:'v2 增补', name:'全人类的医生', date:'2026-08-20', kind:'root', state:'past',
+      lines:['152 医系普查', '第六件事"记"'],
+      story:'对 152 个医学体系的普查写成的增补卷。结论：全人类独立发现了同三件事（冷与热 / 通则不痛 / 治病的是关系）；送出识假律护身符；补上第七件事"记"。',
+      cond:'数据底座由此扩成文明的广度。' },
+    { id:'v2-1i', v:'v2.1', name:'外部审计', date:'2026-08-20', kind:'root', state:'past',
+      lines:['健康律定稿六动词', '收编 45 岁体检报告'],
+      story:'外部独立审计。健康律定稿为六个动词——"护"（减少损伤）与"防"（预防可预防）是初版漏掉、审计补上的最重两根。45 岁高负荷者体检报告收编为压卷。',
+      cond:'书第一次请外面的人挑自己的错——这一步定下了"纠错永续"的脾气。' },
+    { id:'zhuan', v:'专章', name:'五官与微解剖', date:'2026-08-20', kind:'root', state:'past',
+      lines:['第 2.5 / 9.5 章'],
+      story:'五官与微解剖两篇专章成稿，收录为第 2.5 / 9.5 章——脸面上的五感与细胞尺度的风景，各得一整章。',
+      cond:'此后"补章不改章"成为习惯：新知识长新枝，不砍旧枝。' },
+
+    { id:'v0-9',  v:'v0.9', name:'公开版', date:'2026-08-19', kind:'leaf', state:'past',
+      lines:['首次公开发行', '单文件网页'],
+      story:'公开发行的第一天。十三章+新撰全年龄卷+全景图互动章，首次打包成一个单文件网页——没有服务器、没有依赖，双击即读。书从书房走上街。',
+      cond:'过渡到 v0.9.1：读者来了，第一种语言之外的声音也来了。' },
+    { id:'v0-9-1',v:'v0.9.1', name:'英文版', date:'2026-08-20', kind:'leaf', state:'past',
+      lines:['英文版上线', '删语言条款'],
+      story:'英文版上线。同日删去语言条款——一本书不该规定读它的人说什么语言。这是书第一次为读者改自己的规则。',
+      cond:'过渡到 v1.0：既然读者不止一种语言，也不该只有一种邻居。' },
+    { id:'v1-0',  v:'v1.0', name:'邻居与夜晚', date:'2026-08-20', kind:'leaf', state:'past',
+      lines:['卷三+卷六收录', '夜读模式+书之弧'],
+      story:'收录卷三《万物有灵》与卷六《数字时代》；新增夜读模式与"书之弧"进度条。版本记录里写了理由：邻居与夜晚，都该被这本书照亮。',
+      cond:'过渡到 v1.5：内容在长，形式也得长——设计系统提上日程。' },
+    { id:'v1-5',  v:'v1.5', name:'设计系统', date:'2026-08-20', kind:'leaf', state:'past',
+      lines:['双主题 31 色 token', '新增卷二+卷四'],
+      story:'设计系统 v1 实施：双主题 31 色 token、本地字体栈、680px 阅读栏、44px 触达、对比度全 WCAG 实测。新增卷二《人与人》与卷四《地球》——书的骨架从"一具身体"扩成"一个世界"。',
+      cond:'过渡到 v2.0：骨架既定，七部可以合拢了。' },
+    { id:'v2-0',  v:'v2.0', name:'七部齐全', date:'2026-08-20', kind:'leaf', state:'past',
+      lines:['卷五星空+卷七时间河', '前沿 23 条+终部合一'],
+      story:'七部齐全：新增卷五《星空》（宇宙家谱·认识纪律示范章）与卷七《时间之河》（四层时间·八阶段·死亡教育）；前沿注入 23 条（2009-2024 诺奖级机制）；新增终部·合一章与朗读器。部序自此定型。',
+      cond:'过渡到 v2.5：结构完整了，书开始学习一件新事——听。' },
+    { id:'v2-5',  v:'v2.5', name:'心跳', date:'2026-08-20', kind:'leaf', state:'past',
+      lines:['心跳反馈回路', '每章三颗心'],
+      story:'心跳反馈回路上线——每章末三颗心（❤️ 有用 / 💗 想做点什么 / 💔 看不懂），点击即记，只存本机。姊妹篇小朋友版《给你的城》同日诞生。书开始听见读者。',
+      cond:'过渡到 v3.0：能听之后，学会应答。' },
+    { id:'v3-0',  v:'v3.0', name:'活的书', date:'2026-08-20', kind:'crown', state:'past',
+      lines:['活书器官定版', '伴读+个性化+心跳'],
+      story:'活书器官定版：AI 伴读（规则版离线可用+API 预留）、个性化记忆、心跳回路——三线合流，右下浮层互斥让位。书从"响应读者"走向"陪伴读者"。这是当前公开发行版。',
+      cond:'过渡到 v4.0：书已能听、能答；下一步是交出笔。' },
+
+    { id:'v4-0',  v:'v4.0', name:'世代书', date:'未来', kind:'future', state:'now',
+      lines:['共创奠基中', '作者从"我们"变"所有人"'],
+      story:'作者从"我们"变"所有人"：读者共创、版本树公开。<a href="./contribute.html">共同写作页</a>（四条贡献通道+贡献者宪章+致谢墙）与本版本树页，就是它的第一块基石——你此刻读的这一页正在参与奠基。',
+      cond:'过渡条件（丝滑路径）：v3.0 的反馈中涌现高质量贡献者 → 邀请入编辑层。', link:true },
+    { id:'v5-0',  v:'v5.0', name:'感知书', date:'未来', kind:'future', state:'future',
+      lines:['接入数据流'],
+      story:'书接入数据流：新研究自动入册，全人类的疑问聚合显影——哪里没讲懂，书自己会长过去。',
+      cond:'过渡条件：v4.0 社区建立审校制 → API 化对接文献流。' },
+    { id:'v6-0',  v:'v6.0', name:'对话书', date:'未来', kind:'future', state:'future',
+      lines:['可质疑与答辩'],
+      story:'每章可被质疑与答辩：反驳 → 证据裁决 → 章改。科学方法内嵌进书的骨骼，而不只是写在附录里。',
+      cond:'过渡条件：v5.0 数据流 + 社区成熟 → 裁决程序立法。' },
+    { id:'v7-0',  v:'v7.0', name:'万物书', date:'未来', kind:'future', state:'future',
+      lines:['知识本体化'],
+      story:'知识本体化：跨语言全谱 + 机器可执行版 + 给 AI 读的版本。共同写作页里的 data-slot 本地化指南，是它最早的地基之一。',
+      cond:'过渡条件：v6.0 的结构化积累自然溢出。' },
+    { id:'v8-0',  v:'v8.0', name:'教育书', date:'未来', kind:'future', state:'future',
+      lines:['全球生命教育默认底层'],
+      story:'成为全球生命教育的默认底层——像识字课本的位置：不再被引用，而是被默认。',
+      cond:'过渡条件：万物书的零门槛性被教育系统采纳。' },
+    { id:'v9-0',  v:'v9.0', name:'文明书', date:'未来', kind:'future', state:'future',
+      lines:['文明知识基础设施'],
+      story:'成为文明知识基础设施的一部分——与文字、印刷、互联网同列。这不是书的野心，是书的义务岗位。',
+      cond:'过渡条件：教育书数十年的稳定与信任积累。' },
+    { id:'v10-0', v:'v10.0', name:'传承书', date:'未来', kind:'future', state:'future',
+      lines:['跨代际记忆装置'],
+      story:'跨代际记忆装置——冷凝器完成态：每代人的认识结晶不挥发地传给下一代。这是数百年尺度的事，所以它画得最淡、也最高。',
+      cond:'过渡条件：文明书的长跑。终局推演书提醒：按书的宪法，它永远不宣称到达终点。' }
+  ];
+
+  var byId = {};
+  NODES.forEach(function(n){ byId[n.id] = n; });
+
+  var gStatic = document.getElementById('g-static');
+  var gNodes = document.getElementById('g-nodes');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function leafPath(scale){
+    /* 一片叶：从叶柄到叶尖的水平叶形 */
+    var s = scale || 1;
+    return 'M0,0 C' + (6*s) + ',' + (-8*s) + ' ' + (22*s) + ',' + (-9*s) + ' ' + (30*s) + ',0 C' +
+           (22*s) + ',' + (9*s) + ' ' + (6*s) + ',' + (8*s) + ' 0,0 Z';
+  }
+
+  function makeNodeGroup(n, x, y, opts){
+    opts = opts || {};
+    var g = el('g', { 'class':'node' + (n.kind === 'root' ? ' rootn' : '') + (n.kind === 'future' ? ' future' : ''),
+      tabindex:'0', role:'button',
+      'aria-label': n.v + ' ' + n.name + '（' + n.date + '）：' + n.lines.join('，'),
+      transform:'translate(' + x + ',' + y + ')' }, gNodes);
+    if(opts.opacity){ g.setAttribute('opacity', opts.opacity); }
+    g.dataset.vid = n.id;
+
+    var lscale = n.kind === 'crown' ? 1.35 : (n.kind === 'future' ? .8 : 1);
+    var rot = opts.rot != null ? opts.rot : (opts.anchor === 'end' ? -135 : -45);
+    if(n.kind === 'crown') rot = -90;
+    if(n.kind === 'future') rot = -90;
+
+    var lf = el('path', { 'class':'lf', d:leafPath(lscale), transform:'rotate(' + rot + ')' +
+      (n.kind === 'crown' ? '' : '') }, g);
+    /* 叶脉 */
+    var vein = el('path', { 'class':'vein', transform:'rotate(' + rot + ')',
+      d:'M2,0 L' + Math.round(26 * lscale) + ',0' }, g);
+
+    /* 文字：label 放在叶的下/侧方（树冠=右侧让开主干；顶梢未来叶=紧凑不排日期） */
+    var tx = 0, firstTy = 26;
+    if(n.kind === 'crown'){ tx = 16; firstTy = -4; }
+    if(n.kind === 'future'){
+      if(opts.anchor === 'start'){ tx = 10; }
+      else if(opts.anchor === 'end'){ tx = -10; }
+      firstTy = n.id === 'v4-0' ? 22 : 4;
+    }
+    var anchor = opts.anchor === 'start' ? 'start' : (opts.anchor === 'end' ? 'end' : 'middle');
+    if(n.kind === 'crown') anchor = 'start';
+
+    var compact = n.kind === 'future' && n.id !== 'v4-0' && n.id !== 'v5-0' && n.id !== 'v6-0';
+    var t1 = el('text', { 'class':'vno', x:tx, y:firstTy, 'text-anchor':anchor }, g);
+    t1.textContent = n.v;
+    if(!compact){
+      var t2 = el('text', { 'class':'vdate', x:tx, y:firstTy + 15, 'text-anchor':anchor }, g);
+      t2.textContent = n.date;
+    }
+    n.lines.forEach(function(line, i){
+      var t = el('text', { 'class':'vline', x:tx,
+        y:compact ? firstTy + 16 + i * 14 : firstTy + 31 + i * 14, 'text-anchor':anchor }, g);
+      t.textContent = line;
+    });
+    return g;
+  }
+
+  /* ---- 静态骨架：地平线/土/干/枝/根/未来枝 ---- */
+  function draw(){
+    var order = [];
+    var soil = el('rect', { 'class':'soil grow', x:40, y:GROUND_Y, width:840, height:205, rx:10 }, gStatic);
+    order.push(soil);
+    var ground = el('line', { 'class':'ground grow', x1:40, y1:GROUND_Y, x2:880, y2:GROUND_Y }, gStatic);
+    order.push(ground);
+
+    var trunk = el('path', { 'class':'trunk grow', d:TRUNK }, gStatic);
+    var trunk2 = el('path', { 'class':'trunk2 grow', d:TRUNK }, gStatic);
+    order.push(trunk, trunk2);
+
+    /* 树冠一粒星（v3.0 顶端的星标） */
+    var star = el('circle', { 'class':'crown-star grow', cx:460, cy:224, r:4.5 }, gStatic);
+    order.push(star);
+
+    var branchEls = [];
+    BRANCHES.forEach(function(b){
+      branchEls.push(el('path', { 'class':'twig grow', d:b.d }, gStatic));
+    });
+    ROOTS.forEach(function(r){
+      branchEls.push(el('path', { 'class':'root grow', d:r.d }, gStatic));
+    });
+    FUTURES.forEach(function(f){
+      branchEls.push(el('path', { 'class':'future-twig grow', d:f.d, opacity:f.op }, gStatic));
+    });
+
+    /* ---- 叶节点 ---- */
+    var leafPos = {
+      'v0-9':   { x:646, y:542, anchor:'start' },
+      'v0-9-1': { x:276, y:492, anchor:'end' },
+      'v1-0':   { x:652, y:432, anchor:'start' },
+      'v1-5':   { x:270, y:372, anchor:'end' },
+      'v2-0':   { x:654, y:314, anchor:'start' },
+      'v2-5':   { x:284, y:258, anchor:'end' },
+      'v3-0':   { x:460, y:190, anchor:'start' }
+    };
+    var i, n, p, g;
+    for(i = 0; i < NODES.length; i++){
+      n = NODES[i];
+      if(n.kind === 'leaf' || n.kind === 'crown'){
+        p = leafPos[n.id];
+        makeNodeGroup(n, p.x, p.y, { anchor:p.anchor });
+      }
+    }
+    for(i = 0; i < ROOTS.length; i++){
+      var r = ROOTS[i];
+      n = byId[r.id];
+      makeNodeGroup(n, r.lx, r.ly, { anchor:'middle' });
+    }
+    for(i = 0; i < FUTURES.length; i++){
+      var f = FUTURES[i];
+      n = byId[f.id];
+      makeNodeGroup(n, f.lx, f.ly, { anchor:f.anchor, opacity:f.op });
+    }
+
+    /* ---- 生长动画编排 ---- */
+    if(!reduced){
+      document.body.classList.add('anim');
+      /* 干先描边生长 */
+      [trunk, trunk2].forEach(function(t){
+        var len = t.getTotalLength();
+        t.style.strokeDasharray = len;
+        t.style.strokeDashoffset = len;
+        t.style.animation = 'none';
+        t.style.opacity = 1;
+        t.getBoundingClientRect(); /* reflow */
+        t.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.16,1,.3,1)';
+        requestAnimationFrame(function(){ t.style.strokeDashoffset = '0'; });
+      });
+      order.forEach(function(e, idx){
+        if(e === trunk || e === trunk2) return;
+        e.style.animationDelay = (idx * 60) + 'ms';
+      });
+      branchEls.forEach(function(e, idx){
+        e.style.animationDelay = (500 + idx * 130) + 'ms';
+      });
+      [].slice.call(gNodes.children).forEach(function(node, idx){
+        node.style.animationDelay = (650 + idx * 90) + 'ms';
+      });
+    }
+
+    /* ---- 选中与键盘 ---- */
+    var sV = document.getElementById('s-v'),
+        sName = document.getElementById('s-name'),
+        sDate = document.getElementById('s-date'),
+        sState = document.getElementById('s-state'),
+        sText = document.getElementById('s-text'),
+        sCond = document.getElementById('s-cond');
+
+    var STATE_TXT = {
+      past:  { txt:'史实 · 版本记录', cls:'st-past' },
+      now:   { txt:'进行中 · 你正在参与', cls:'st-now' },
+      future:{ txt:'推演 · 置信度递减', cls:'st-future' }
+    };
+
+    function select(id){
+      var nd = byId[id];
+      if(!nd) return;
+      [].slice.call(gNodes.children).forEach(function(node){
+        node.classList.toggle('sel', node.dataset.vid === id);
+      });
+      sV.textContent = nd.v;
+      sName.textContent = nd.name;
+      sDate.textContent = nd.date === '未来' ? '未来 · 谱系推演' : nd.date;
+      var st = STATE_TXT[nd.state];
+      sState.textContent = st.txt;
+      sState.className = 's-state ' + st.cls;
+      sText.innerHTML = nd.story;
+      sCond.innerHTML = '<strong>年轮的衔接：</strong>' + nd.cond;
+    }
+
+    [].slice.call(gNodes.children).forEach(function(node){
+      node.addEventListener('click', function(){ select(node.dataset.vid); });
+      node.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar'){
+          ev.preventDefault();
+          select(node.dataset.vid);
+        }
+      });
+    });
+
+    select('v4-0');
+  }
+
+  draw();
+})();
+</script>
+</body>
+</html>
